@@ -11,6 +11,9 @@ export const apiRoutes = {
 		FORGOT_PASSWORD: "/api/v1/auth/forgot-password",
 		RESET_PASSWORD: "/api/v1/auth/reset-password",
 		LOGOUT: "/api/v1/auth/logout",
+		VERIFY_EMAIL: "/api/v1/auth/verify-email",
+		RESEND_OTP: "/api/v1/auth/resend-otp",
+		VERIFY_RESET_OTP: "/api/v1/auth/verify-reset-otp",
 	},
 
 	users: {

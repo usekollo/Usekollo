@@ -1,5 +1,6 @@
-import { Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ConnectWalletModal from "./ConnectWalletModal";
+import WalletIcon from "./WalletIcon";
 
 export default function CtaBand() {
 	return (
@@ -12,10 +13,14 @@ export default function CtaBand() {
 					Connect a Stellar Testnet wallet and turn your next milestone into a plan you can see.
 				</p>
 				<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-					<Button size="lg" variant="light">
-						<Wallet className="size-4" />
-						Connect Wallet
-					</Button>
+					<ConnectWalletModal
+						trigger={
+							<Button size="lg" variant="light">
+								<WalletIcon className="size-4" />
+								Connect Wallet
+							</Button>
+						}
+					/>
 					<Button
 						size="lg"
 						variant="outline"

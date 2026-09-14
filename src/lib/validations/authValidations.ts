@@ -40,8 +40,30 @@ export const ForgotPasswordSchema = z.object({
 
 export type ForgotPasswordValues = z.infer<typeof ForgotPasswordSchema>;
 
-// The reset token comes from the link in the email (a URL query param), not
-// something the user types in — this form only collects the new password.
+export const VerifyEmailSchema = z.object({
+	otp: z
+		.string()
+		.nonempty("Enter the code we sent you")
+		.length(6, "Enter all 6 digits"),
+});
+
+export type VerifyEmailValues = z.infer<typeof VerifyEmailSchema>;
+
+// Same shape as VerifyEmailSchema, kept separate since it verifies a
+// different code for a different purpose (resetting a password, not
+// confirming an email address) even though the rule is identical today.
+export const ResetPasswordOtpSchema = z.object({
+	otp: z
+		.string()
+		.nonempty("Enter the code we sent you")
+		.length(6, "Enter all 6 digits"),
+});
+
+export type ResetPasswordOtpValues = z.infer<typeof ResetPasswordOtpSchema>;
+
+// Identity for this step comes from having passed the OTP step just before
+// it (see ResetPasswordOtpSchema) — this form only collects the new
+// password itself.
 export const ResetPasswordSchema = z
 	.object({
 		password: z

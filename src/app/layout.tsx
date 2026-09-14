@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import AuthProvider from "@/components/providers/AuthProvider";
 
-// Swap for the brand typeface once the Figma designs land — everything
-// else references the font only via the `--font-sans` CSS variable
-// (globals.css), so changing it here is the only edit needed.
-const sans = Geist({
+// Figma "Landing Page" (104-3807) specs this as the brand typeface.
+// Everything else references the font only via the `--font-sans` CSS
+// variable (globals.css), so changing it here is the only edit needed.
+const sans = DM_Sans({
 	variable: "--font-sans",
 	subsets: ["latin"],
 });
