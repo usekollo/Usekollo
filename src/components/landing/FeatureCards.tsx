@@ -111,7 +111,7 @@ export default function FeatureCards() {
 							height={229}
 							className="h-auto w-full"
 						/>
-						<div className="mt-4 space-y-2">
+						{/* <div className="mt-4 space-y-2">
 							<Button size="lg" className="w-full">
 								<Plus className="size-4" />
 								Add Savings
@@ -119,7 +119,7 @@ export default function FeatureCards() {
 							<Button size="lg" variant="outline" className="w-full border-grey-light-active">
 								Withdraw
 							</Button>
-						</div>
+						</div> */}
 					</div>
 				</WideCardShell>
 			</div>
