@@ -1,10 +1,10 @@
 import type { SVGProps } from "react";
 
 // The actual Kollo wallet glyph (two overlapping cards) — used for every
-// "Connect Wallet"/"Connect Stellar Wallet" button and the feature-card
-// icon badges. `currentColor` so it picks up whatever text color the
-// button/badge variant sets (blue-light on primary buttons, etc.) instead
-// of a color baked into the file.
+// "Connect Wallet"/"Connect Stellar Wallet" button, feature-card icon
+// badges, and the dashboard header's balance chip. `currentColor` so it
+// picks up whatever text color its container sets (blue-light on primary
+// buttons, etc.) instead of a color baked into the file.
 export default function WalletIcon(props: SVGProps<SVGSVGElement>) {
 	return (
 		<svg viewBox="0 0 19 18" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>

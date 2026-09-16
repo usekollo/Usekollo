@@ -14,6 +14,12 @@ export const pageRoutes = {
 	},
 	dashboardRoutes: {
 		DASHBOARD: "/dashboard",
+		SAVINGS_GOALS: "/dashboard/goals",
+		CREATE_GOAL: "/dashboard/goals/new",
+		GOAL_DETAIL: (id: string) => `/dashboard/goals/${id}`,
+		ADD_SAVINGS: (id: string) => `/dashboard/goals/${id}/add`,
+		WITHDRAW: (id: string) => `/dashboard/goals/${id}/withdraw`,
+		ACTIVITY: "/dashboard/activity",
 		PROFILE: "/dashboard/profile",
 	},
 };

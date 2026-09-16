@@ -193,6 +193,7 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+		overflow-x: hidden;
 	}
 	html {
 		@apply font-sans;
@@ -207,5 +208,29 @@
 	}
 	.hide-scroll::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* Skeleton loading placeholder — components/ui/skeleton.tsx. A moving
+	   gradient sheen rather than plain animate-pulse (the earlier max-*
+	   breakpoint variant issue — see figma-color-tokens memory — is a
+	   reminder to keep anything load-bearing for a visual effect as plain
+	   hand-written CSS here rather than a dynamic Tailwind JIT class). */
+	.skeleton-shimmer {
+		position: relative;
+		overflow: hidden;
+		background-color: var(--grey-light);
+	}
+	.skeleton-shimmer::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		transform: translateX(-100%);
+		background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+		animation: skeleton-shimmer-sweep 1.6s ease-in-out infinite;
+	}
+	@keyframes skeleton-shimmer-sweep {
+		100% {
+			transform: translateX(100%);
+		}
 	}
 }

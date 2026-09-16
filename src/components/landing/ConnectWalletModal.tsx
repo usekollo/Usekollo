@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { ArrowRight, Fingerprint, QrCode, Sailboat, X } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import WalletIcon from "./WalletIcon";
+import WalletIcon from "@/components/icons/WalletIcon";
 
 const wallets = [
 	{ name: "Freighter Wallet", icon: Sailboat },

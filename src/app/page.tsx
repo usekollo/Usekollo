@@ -10,7 +10,7 @@ import StepsSection from "@/components/landing/StepsSection";
 // (fetched as screenshots; the Figma API was rate-limited at the time).
 export default function Home() {
 	return (
-		<div>
+		<div className="overflow-x-hidden">
 			<SiteHeader />
 			<HeroSection />
 			<FeatureIntro />

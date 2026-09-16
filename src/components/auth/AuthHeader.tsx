@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ConnectWalletModal from "@/components/landing/ConnectWalletModal";
-import WalletIcon from "@/components/landing/WalletIcon";
+import WalletIcon from "@/components/icons/WalletIcon";
 
 // Sits over the full-bleed background photo on auth pages (desktop only —
 // mobile auth screens are plain white, no chrome). White text/divider for

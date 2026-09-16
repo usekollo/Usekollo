@@ -1,8 +1,10 @@
+"use client";
+
 import type { ReactNode } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { fadeUp, hoverLift, staggerContainer, viewport } from "@/lib/utils/animations";
 import { cn } from "@/lib/utils";
-import WalletIcon from "./WalletIcon";
+import WalletIcon from "@/components/icons/WalletIcon";
 
 function CardShell({
 	title,
@@ -16,7 +18,9 @@ function CardShell({
 	className?: string;
 }) {
 	return (
-		<div
+		<motion.div
+			variants={fadeUp}
+			{...hoverLift}
 			className={cn(
 				"flex flex-col justify-between gap-6 rounded-3xl bg-primary p-6 text-primary-foreground sm:p-8",
 				className,
@@ -30,7 +34,7 @@ function CardShell({
 				<p className="mt-2 text-sm opacity-85">{description}</p>
 			</div>
 			{children}
-		</div>
+		</motion.div>
 	);
 }
 
@@ -44,7 +48,11 @@ function WideCardShell({
 	children: ReactNode;
 }) {
 	return (
-		<div className="flex flex-col gap-6 rounded-3xl bg-primary p-6 text-primary-foreground sm:p-8 md:flex-row md:items-center">
+		<motion.div
+			variants={fadeUp}
+			{...hoverLift}
+			className="flex flex-col gap-6 rounded-3xl bg-primary p-6 text-primary-foreground sm:p-8 md:flex-row md:items-center"
+		>
 			<div className="md:w-2/5 md:shrink-0">
 				<span className="inline-flex size-9 items-center justify-center rounded-full bg-white/15">
 					<WalletIcon className="size-4 text-white" />
@@ -53,7 +61,7 @@ function WideCardShell({
 				<p className="mt-2 text-sm opacity-85">{description}</p>
 			</div>
 			<div className="md:flex-1">{children}</div>
-		</div>
+		</motion.div>
 	);
 }
 
@@ -65,10 +73,17 @@ function WideCardShell({
 // same way (vertically, full width) on mobile. The mock content in each
 // card is the actual exported Figma asset (public/images/*-img.svg,
 // background baked in); the badge icon is the same wallet glyph on all
-// three cards, per Figma.
+// three cards, per Figma. Cards stagger in on scroll and lift slightly on
+// hover (see lib/utils/animations).
 export default function FeatureCards() {
 	return (
-		<div className="custom-container grid gap-6 pb-16 md:grid-cols-[1fr_2fr] md:pb-24">
+		<motion.div
+			variants={staggerContainer}
+			initial="hidden"
+			whileInView="show"
+			viewport={viewport}
+			className="custom-container grid gap-6 pb-16 md:grid-cols-[1fr_2fr] md:pb-24"
+		>
 			<CardShell
 				title="Stay in control"
 				description="All you do is connect your Stellar Testnet wallet. UseKollo will never take custody of your assets."
@@ -123,6 +138,6 @@ export default function FeatureCards() {
 					</div>
 				</WideCardShell>
 			</div>
-		</div>
+		</motion.div>
 	);
 }

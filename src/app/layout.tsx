@@ -14,12 +14,50 @@ const sans = DM_Sans({
 	subsets: ["latin"],
 });
 
+// NEXT_PUBLIC_SITE_URL is unset in this project so far (see .env) — falls
+// back to localhost so `new URL(...)` never throws in dev, but this MUST
+// be set to the real deployed domain before sharing a production link:
+// without it, the og:image/twitter:image URLs social platforms fetch
+// resolve to localhost and the preview card will come up broken.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+const title = {
+	default: "Kollo — Non-Custodial Savings on Stellar",
+	template: "%s | Kollo",
+};
+const description =
+	"Non-custodial savings infrastructure on Stellar Testnet. Your keys, your assets, your goals.";
+
 export const metadata: Metadata = {
-	title: {
-		default: "Kollo",
-		template: "%s | Kollo",
+	metadataBase: new URL(siteUrl),
+	title,
+	description,
+	keywords: [
+		"Kollo",
+		"Stellar",
+		"non-custodial wallet",
+		"crypto savings",
+		"savings goals",
+		"Stellar Testnet",
+		"USDC savings",
+	],
+	authors: [{ name: "Kollo" }],
+	openGraph: {
+		type: "website",
+		url: "/",
+		siteName: "Kollo",
+		title: title.default,
+		description,
 	},
-	description: "Non-custodial savings infrastructure on Stellar Testnet. Your keys, your assets, your goals.",
+	twitter: {
+		card: "summary_large_image",
+		title: title.default,
+		description,
+	},
+	robots: {
+		index: true,
+		follow: true,
+	},
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

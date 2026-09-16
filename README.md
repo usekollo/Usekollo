@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app), scaffolded with the same tooling/conventions as [med-archive](../med-archive).
 
 ## Getting started
@@ -54,3 +55,21 @@ New features follow the `features/<name>/{components,hooks,types.ts}` shape — 
 - [React Hook Form](https://react-hook-form.com/)
 - [Zod](https://zod.dev/)
 - [shadcn/ui](https://ui.shadcn.com/)
+=======
+## Hi there 👋
+
+<!--
+**usekollo/Usekollo** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+
+Here are some ideas to get you started:
+
+- 🔭 I’m currently working on ...
+- 🌱 I’m currently learning ...
+- 👯 I’m looking to collaborate on ...
+- 🤔 I’m looking for help with ...
+- 💬 Ask me about ...
+- 📫 How to reach me: ...
+- 😄 Pronouns: ...
+- ⚡ Fun fact: ...
+-->
+>>>>>>> d1089abcac826f234d789fed858f3649d56975f2
