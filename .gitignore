@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Markdown & documents — do not push
+*.md
+*.docx
+*.pdf
+*.xlsx
+*.pptx
+*.pages
+*.numbers
+*.odt
+*.rtf
+docs/
