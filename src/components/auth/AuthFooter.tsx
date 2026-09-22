@@ -1,5 +1,6 @@
 export default function AuthFooter() {
 	return (
+		// footer
 		<footer className="hidden border-t border-white/20 md:block">
 			<div className="custom-container flex items-center justify-between py-6 text-sm text-white/90">
 				<span>© {new Date().getFullYear()} – Usekollo</span>
