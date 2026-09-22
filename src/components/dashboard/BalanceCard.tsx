@@ -25,7 +25,7 @@ export default function BalanceCard({ data }: { data: DashboardSummary }) {
 				</span>
 			</div>
 
-			<p className="mt-2 text-4xl font-semibold md:text-5xl">{formatMoney(data.balance)}</p>
+			<p className="mt-2 text-4xl font-semibold lg:text-5xl">{formatMoney(data.balance)}</p>
 
 			<div className="mt-5 h-1.5 rounded-full bg-white/25">
 				<div className="h-1.5 rounded-full bg-white" style={{ width: `${progress}%` }} />
@@ -36,7 +36,7 @@ export default function BalanceCard({ data }: { data: DashboardSummary }) {
 				href={pageRoutes.dashboardRoutes.CREATE_GOAL}
 				size="xl"
 				variant="light"
-				className="mt-6 hidden w-full md:flex"
+				className="mt-6 hidden w-full lg:flex"
 			>
 				<Plus className="size-4" />
 				Create Savings Goal
@@ -61,7 +61,7 @@ export function BalanceCardSkeleton() {
 			</div>
 			<Skeleton className="mt-3 h-10 w-40 bg-white/20" />
 			<Skeleton className="mt-6 h-1.5 w-full bg-white/20" />
-			<Skeleton className="mt-6 hidden h-15 w-full rounded-full bg-white/20 md:block" />
+			<Skeleton className="mt-6 hidden h-15 w-full rounded-full bg-white/20 lg:block" />
 			<div className="mt-4 flex items-center justify-between">
 				<Skeleton className="h-3 w-20 bg-white/20" />
 				<Skeleton className="h-3 w-24 bg-white/20" />

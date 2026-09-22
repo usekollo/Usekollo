@@ -263,7 +263,7 @@ function TransactionResult({
 
 	if (result.success) {
 		return (
-			<div className="rounded-3xl bg-white p-6 text-center shadow-xs md:p-8">
+			<div className="rounded-3xl bg-white p-6 text-center shadow-xs lg:p-8">
 				<span className="mx-auto flex size-16 items-center justify-center rounded-full bg-blue-light">
 					<span className="flex size-10 items-center justify-center rounded-full bg-primary text-white">
 						<Check className="size-5" strokeWidth={3} />
@@ -305,7 +305,7 @@ function TransactionResult({
 	}
 
 	return (
-		<div className="rounded-3xl bg-white p-6 text-center shadow-xs md:p-8">
+		<div className="rounded-3xl bg-white p-6 text-center shadow-xs lg:p-8">
 			<span className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-100 text-destructive">
 				<span className="flex size-10 items-center justify-center rounded-full border-2 border-destructive">
 					<X className="size-5" strokeWidth={3} />
@@ -433,7 +433,7 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 
 	return (
 		<div className="space-y-6">
-			<div className="hidden items-center gap-2 text-sm text-grey-light-active md:flex">
+			<div className="hidden items-center gap-2 text-sm text-grey-light-active lg:flex">
 				<Link
 					href={pageRoutes.dashboardRoutes.GOAL_DETAIL(goal.id)}
 					className="flex items-center gap-2 hover:text-grey-normal"
@@ -447,7 +447,7 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 			{phase === "result" && result ? (
 				<TransactionResult mode={mode} result={result} onRetry={handleRetry} goalId={goal.id} />
 			) : (
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
 					<GoalSummaryCard
 						name={goal.name}
 						status={goal.status}
@@ -461,7 +461,7 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 							<Label className="text-xs font-medium tracking-wide text-grey-normal uppercase">
 								{copy.amountLabel} ({goal.currency})
 							</Label>
-							<div className="mt-2 flex items-center gap-3 rounded-3xl border border-border bg-white px-5 py-4 md:rounded-none md:border-none md:bg-transparent md:px-0 md:py-0">
+							<div className="mt-2 flex items-center gap-3 rounded-3xl border border-border bg-white px-5 py-4 lg:rounded-none lg:border-none lg:bg-transparent lg:px-0 lg:py-0">
 								<span className="text-sm font-medium text-grey-light-active">{goal.currency}</span>
 								<input
 									type="text"
@@ -480,13 +480,13 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 						{/* Mobile: bordered pill chips, clustered left. Desktop: plain text,
 						    spread across the full row (see the pasted "Add Savings" desktop
 						    reference — no pill/border there at all). */}
-						<div className="flex flex-wrap gap-2 md:flex-nowrap md:justify-between md:gap-0">
+						<div className="flex flex-wrap gap-2 lg:flex-nowrap lg:justify-between lg:gap-0">
 							{QUICK_AMOUNTS.map((value) => (
 								<button
 									key={value}
 									type="button"
 									onClick={() => addQuickAmount(value)}
-									className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-grey-lighter md:rounded-none md:border-none md:p-0 md:hover:opacity-70"
+									className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-grey-lighter lg:rounded-none lg:border-none lg:p-0 lg:hover:opacity-70"
 								>
 									{copy.chipSign}${value}
 								</button>
@@ -494,7 +494,7 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 							<button
 								type="button"
 								onClick={setMaxAmount}
-								className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-grey-lighter md:rounded-none md:border-none md:p-0 md:hover:opacity-70"
+								className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-grey-lighter lg:rounded-none lg:border-none lg:p-0 lg:hover:opacity-70"
 							>
 								Max
 							</button>

@@ -20,17 +20,17 @@ export default function SavingsGoalsPage() {
 	if (isLoading) {
 		return (
 			<div className="space-y-6">
-				<div className="flex flex-col gap-6 md:flex-row">
-					<div className="md:w-2/5">
+				<div className="flex flex-col gap-6 lg:flex-row">
+					<div className="lg:w-2/5">
 						<BalanceCardSkeleton />
 					</div>
-					<div className="space-y-3 md:flex-1">
+					<div className="space-y-3 lg:flex-1">
 						{Array.from({ length: 3 }).map((_, index) => (
 							<GoalCardSkeleton key={index} />
 						))}
 					</div>
 				</div>
-				<div className="hidden md:block">
+				<div className="hidden lg:block">
 					<ActivitySectionSkeleton />
 				</div>
 			</div>
@@ -39,15 +39,15 @@ export default function SavingsGoalsPage() {
 
 	if (!data || data.goals.length === 0) {
 		return (
-			<div className="flex flex-col items-center px-4 py-16 text-center md:py-24">
+			<div className="flex flex-col items-center px-4 py-16 text-center lg:py-24">
 				<span className="flex size-20 items-center justify-center rounded-full bg-grey-lighter text-grey-dark">
 					<Target className="size-8" strokeWidth={1.5} />
 				</span>
 
-				<h1 className="mt-6 hidden text-2xl font-medium text-foreground md:block md:text-3xl">
+				<h1 className="mt-6 hidden text-2xl font-medium text-foreground lg:block lg:text-3xl">
 					No Active Goals
 				</h1>
-				<p className="mt-2 hidden max-w-sm text-sm text-grey-normal md:block">
+				<p className="mt-2 hidden max-w-sm text-sm text-grey-normal lg:block">
 					You haven&apos;t connected a wallet yet. Connect one to create your first savings goal and start
 					tracking your progress.
 				</p>
@@ -66,7 +66,7 @@ export default function SavingsGoalsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="hidden items-center justify-between md:flex">
+			<div className="hidden items-center justify-between lg:flex">
 				<span className="text-xs font-medium tracking-wide text-foreground uppercase">Savings Goals</span>
 				<div className="flex items-center gap-3">
 					<button
@@ -89,29 +89,29 @@ export default function SavingsGoalsPage() {
 			{/* Mobile-only filter pill */}
 			<button
 				type="button"
-				className="flex items-center gap-1 rounded-full border border-border bg-white px-4 py-2 text-xs font-medium text-foreground md:hidden"
+				className="flex items-center gap-1 rounded-full border border-border bg-white px-4 py-2 text-xs font-medium text-foreground lg:hidden"
 			>
 				All Goals
 				<ChevronDown className="size-3.5" />
 			</button>
 
-			<div className="flex flex-col gap-6 md:flex-row">
-				<div className="md:w-2/5">
+			<div className="flex flex-col gap-6 lg:flex-row">
+				<div className="lg:w-2/5">
 					<BalanceCard data={data} />
 				</div>
-				<div className="space-y-3 md:flex-1">
+				<div className="space-y-3 lg:flex-1">
 					{data.goals.map((goal) => (
 						<GoalCard key={goal.id} goal={goal} href={pageRoutes.dashboardRoutes.GOAL_DETAIL(goal.id)} />
 					))}
 				</div>
 			</div>
 
-			<div className="hidden md:block">
+			<div className="hidden lg:block">
 				<ActivitySection activity={data.activity} hideHeading />
 			</div>
 
 			{/* Mobile-only — desktop shows the activity table above instead */}
-			<Button href={pageRoutes.dashboardRoutes.ACTIVITY} size="xl" className="w-full md:hidden">
+			<Button href={pageRoutes.dashboardRoutes.ACTIVITY} size="xl" className="w-full lg:hidden">
 				See Recent Transactions
 			</Button>
 		</div>

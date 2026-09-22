@@ -27,8 +27,8 @@ export default function GoalDetailRing({
 	const offset = CIRCUMFERENCE - (clamped / 100) * CIRCUMFERENCE;
 
 	return (
-		<div className="relative flex size-64 shrink-0 items-center justify-center md:size-48">
-			<svg viewBox="0 0 96 96" className="size-64 -rotate-90 md:size-48">
+		<div className="relative flex size-64 shrink-0 items-center justify-center lg:size-48">
+			<svg viewBox="0 0 96 96" className="size-64 -rotate-90 lg:size-48">
 				<circle cx="48" cy="48" r={RADIUS} fill="none" stroke="var(--grey-light)" strokeWidth="6" />
 				<circle
 					cx="48"
@@ -42,7 +42,7 @@ export default function GoalDetailRing({
 					strokeDashoffset={offset}
 				/>
 			</svg>
-			<div className="absolute inset-8 rounded-full border border-dashed border-grey-light-active md:inset-6" />
+			<div className="absolute inset-8 rounded-full border border-dashed border-grey-light-active lg:inset-6" />
 			<div className="absolute flex flex-col items-center px-4 text-center">{children}</div>
 		</div>
 	);

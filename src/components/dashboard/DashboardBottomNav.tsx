@@ -20,7 +20,7 @@ export default function DashboardBottomNav() {
 	const pathname = usePathname();
 
 	return (
-		<nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-background py-2 md:hidden">
+		<nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-background py-2 lg:hidden">
 			{navItems.map(({ label, href, icon: Icon }) => {
 				const active =
 					href === pageRoutes.dashboardRoutes.DASHBOARD

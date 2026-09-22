@@ -64,9 +64,9 @@ export default function DashboardHeader() {
 
 	return (
 		<header className="border-b border-border bg-background">
-			<div className="px-4 py-4 md:px-8">
+			<div className="px-4 py-4 lg:px-8">
 				{/* Desktop: always the normal header, regardless of route */}
-				<div className="hidden items-center gap-4 md:flex">
+				<div className="hidden items-center gap-4 lg:flex">
 					<Link
 						href={pageRoutes.dashboardRoutes.DASHBOARD}
 						className="flex shrink-0 items-center gap-2"
@@ -110,7 +110,7 @@ export default function DashboardHeader() {
 
 				{/* Mobile: back-chevron + title for sub routes, normal header for a tab's own root */}
 				{subRouteHeader ? (
-					<div className="flex items-center gap-4 md:hidden">
+					<div className="flex items-center gap-4 lg:hidden">
 						<Link
 							href={subRouteHeader.backHref}
 							className="flex size-9 shrink-0 items-center justify-center rounded-full bg-grey-lighter text-foreground"
@@ -123,7 +123,7 @@ export default function DashboardHeader() {
 						</h1>
 					</div>
 				) : (
-					<div className="flex items-center gap-4 md:hidden">
+					<div className="flex items-center gap-4 lg:hidden">
 						<Link
 							href={pageRoutes.dashboardRoutes.DASHBOARD}
 							className="flex shrink-0 items-center gap-2"

@@ -22,7 +22,7 @@ export default function DashboardSidebar() {
 	const pathname = usePathname();
 
 	return (
-		<aside className="hidden shrink-0 md:flex md:h-full md:w-64 md:flex-col md:rounded-3xl md:bg-white md:p-4 md:shadow-xs">
+		<aside className="hidden shrink-0 lg:flex lg:h-full lg:w-64 lg:flex-col lg:rounded-3xl lg:bg-white lg:p-4 lg:shadow-xs">
 			<nav className="flex flex-1 flex-col gap-1">
 				{navItems.map(({ label, href, icon: Icon }) => {
 					// "Dashboard" only matches the exact root; the rest also match

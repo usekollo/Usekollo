@@ -22,11 +22,11 @@ export default function DashboardPage() {
 	if (isLoading) {
 		return (
 			<div className="space-y-6">
-				<div className="flex flex-col gap-6 md:flex-row">
-					<div className="md:w-2/5">
+				<div className="flex flex-col gap-6 lg:flex-row">
+					<div className="lg:w-2/5">
 						<BalanceCardSkeleton />
 					</div>
-					<div className="md:flex-1">
+					<div className="lg:flex-1">
 						<OngoingGoalsSectionSkeleton />
 					</div>
 				</div>
@@ -37,19 +37,19 @@ export default function DashboardPage() {
 
 	if (!data || data.goals.length === 0) {
 		return (
-			<div className="flex flex-col items-center px-4 py-16 text-center md:py-24">
+			<div className="flex flex-col items-center px-4 py-16 text-center lg:py-24">
 				<span className="flex size-20 items-center justify-center rounded-full bg-grey-lighter text-grey-dark">
 					<Target className="size-8" strokeWidth={1.5} />
 				</span>
 
-				<h1 className="mt-6 text-2xl font-medium text-foreground md:text-3xl">No Active Goals</h1>
+				<h1 className="mt-6 text-2xl font-medium text-foreground lg:text-3xl">No Active Goals</h1>
 
 				<p className="mt-2 max-w-sm text-sm text-grey-normal">
-					<span className="hidden md:inline">
+					<span className="hidden lg:inline">
 						You haven&apos;t connected a wallet yet. Connect one to create your first savings
 						goal and start tracking your progress.
 					</span>
-					<span className="md:hidden">
+					<span className="lg:hidden">
 						You haven&apos;t allocated any funds to specific saving targets yet. Goals help you
 						organize your assets.
 					</span>
@@ -69,11 +69,11 @@ export default function DashboardPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex flex-col gap-6 md:flex-row">
-				<div className="md:w-2/5">
+			<div className="flex flex-col gap-6 lg:flex-row">
+				<div className="lg:w-2/5">
 					<BalanceCard data={data} />
 				</div>
-				<div className="md:flex-1">
+				<div className="lg:flex-1">
 					<OngoingGoalsSection goals={data.goals} />
 				</div>
 			</div>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
 			<ActivitySection activity={data.activity} />
 
 			{/* Mobile-only — desktop has this button inside BalanceCard instead */}
-			<Button href={pageRoutes.dashboardRoutes.CREATE_GOAL} size="xl" className="w-full md:hidden">
+			<Button href={pageRoutes.dashboardRoutes.CREATE_GOAL} size="xl" className="w-full lg:hidden">
 				<Plus className="size-4" />
 				Create Savings Goal
 			</Button>

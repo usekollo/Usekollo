@@ -69,7 +69,7 @@ export default function ActivitySection({
 			)}
 
 			{/* Mobile: card list */}
-			<div className="mt-3 space-y-3 md:hidden">
+			<div className="mt-3 space-y-3 lg:hidden">
 				{activity.map((item) => (
 					<div key={item.id} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-xs">
 						<ActivityIcon item={item} />
@@ -82,7 +82,7 @@ export default function ActivitySection({
 			</div>
 
 			{/* Desktop: search/filter bar + table */}
-			<div className="mt-3 hidden md:block">
+			<div className="mt-3 hidden lg:block">
 				<div className="flex items-center gap-3">
 					<div className="relative flex-1">
 						<Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-grey-light-active" />
@@ -172,7 +172,7 @@ export function ActivitySectionSkeleton() {
 			</div>
 
 			{/* Mobile */}
-			<div className="mt-3 space-y-3 md:hidden">
+			<div className="mt-3 space-y-3 lg:hidden">
 				{Array.from({ length: 4 }).map((_, index) => (
 					<div key={index} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-xs">
 						<Skeleton className="size-9 shrink-0 rounded-full" />
@@ -185,7 +185,7 @@ export function ActivitySectionSkeleton() {
 			</div>
 
 			{/* Desktop */}
-			<div className="mt-3 hidden md:block">
+			<div className="mt-3 hidden lg:block">
 				<div className="flex items-center gap-3">
 					<Skeleton className="h-11 flex-1 rounded-full" />
 					<Skeleton className="h-11 w-48 rounded-full" />

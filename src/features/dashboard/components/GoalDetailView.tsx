@@ -54,7 +54,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 function GoalActivityEmptyState() {
 	return (
-		<div className="mt-3 flex flex-col items-center rounded-3xl bg-white px-6 py-10 text-center shadow-xs md:bg-transparent md:shadow-none">
+		<div className="mt-3 flex flex-col items-center rounded-3xl bg-white px-6 py-10 text-center shadow-xs lg:bg-transparent lg:shadow-none">
 			<span className="flex size-12 items-center justify-center rounded-full bg-grey-lighter text-grey-dark">
 				<Clock className="size-5" strokeWidth={1.5} />
 			</span>
@@ -79,11 +79,11 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 	if (isLoading) {
 		return (
 			<div className="space-y-6">
-				<div className="flex flex-col items-center gap-6 md:flex-row md:items-start md:rounded-3xl md:bg-white md:p-8 md:shadow-xs">
-					<Skeleton className="size-64 shrink-0 rounded-full md:size-48" />
-					<div className="w-full space-y-3 md:flex-1">
-						<Skeleton className="mx-auto h-6 w-40 md:mx-0" />
-						<Skeleton className="mx-auto h-4 w-56 md:mx-0" />
+				<div className="flex flex-col items-center gap-6 lg:flex-row lg:items-start lg:rounded-3xl lg:bg-white lg:p-8 lg:shadow-xs">
+					<Skeleton className="size-64 shrink-0 rounded-full lg:size-48" />
+					<div className="w-full space-y-3 lg:flex-1">
+						<Skeleton className="mx-auto h-6 w-40 lg:mx-0" />
+						<Skeleton className="mx-auto h-4 w-56 lg:mx-0" />
 					</div>
 				</div>
 			</div>
@@ -92,7 +92,7 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 
 	if (!goal) {
 		return (
-			<div className="flex flex-col items-center px-4 py-16 text-center md:py-24">
+			<div className="flex flex-col items-center px-4 py-16 text-center lg:py-24">
 				<span className="flex size-20 items-center justify-center rounded-full bg-grey-lighter text-grey-dark">
 					<Target className="size-8" strokeWidth={1.5} />
 				</span>
@@ -144,7 +144,7 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 
 	return (
 		<div className="space-y-6">
-			<div className="hidden items-center gap-2 text-sm text-grey-light-active md:flex">
+			<div className="hidden items-center gap-2 text-sm text-grey-light-active lg:flex">
 				<Link
 					href={pageRoutes.dashboardRoutes.DASHBOARD}
 					className="flex items-center gap-2 hover:text-grey-normal"
@@ -155,13 +155,13 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 				<span className="font-medium text-foreground">{goal.name}</span>
 			</div>
 
-			<div className="flex flex-col items-center text-center  md:flex-row md:items-center md:gap-8 md:rounded-3xl md:bg-white md:p-8 md:text-left md:shadow-xs">
+			<div className="flex flex-col items-center text-center  lg:flex-row lg:items-center lg:gap-8 lg:rounded-3xl lg:bg-white lg:p-8 lg:text-left lg:shadow-xs">
 				<GoalDetailRing percent={percent} status={goal.status}>
 					{ringContent}
 				</GoalDetailRing>
 
 				{/* Mobile-only heading block under the ring */}
-				<div className="mt-6 md:hidden">
+				<div className="mt-6 lg:hidden">
 					{isDone ? (
 						<>
 							<h1 className="text-2xl font-medium text-foreground">
@@ -186,7 +186,7 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 				</div>
 
 				{/* Desktop: stats column */}
-				<div className="hidden flex-1 divide-y divide-border md:block">
+				<div className="hidden flex-1 divide-y divide-border lg:block">
 					<div className="pb-5">
 						<p className="text-xs font-medium tracking-wide text-grey-normal uppercase">
 							{isDone ? "Goal Complete" : "Saved of Target"}
@@ -219,7 +219,7 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 				</div>
 
 				{/* Desktop: quick actions column */}
-				<div className="hidden w-1/3 shrink-0 space-y-3 md:block">
+				<div className="hidden w-1/3 shrink-0 space-y-3 lg:block">
 					<p className="text-xs font-medium tracking-wide text-grey-normal uppercase mb-7">
 						Quick Actions
 					</p>
@@ -261,7 +261,7 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 				</div>
 
 				{/* Mobile-only actions */}
-				<div className="mt-8 w-full space-y-3 md:hidden">
+				<div className="mt-8 w-full space-y-3 lg:hidden">
 					{isDone ? (
 						<Button
 							href={pageRoutes.dashboardRoutes.WITHDRAW(goal.id)}
@@ -290,8 +290,8 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 			</div>
 
 			{isDone ? (
-				<div className="rounded-3xl bg-white md:p-8 md:shadow-xs">
-					<div className="divide-y divide-border px-4 md:px-0">
+				<div className="rounded-3xl bg-white lg:p-8 lg:shadow-xs">
+					<div className="divide-y divide-border px-4 lg:px-0">
 						<DetailRow label="Target Name" value={goal.name} />
 						<DetailRow label="Recipient Address" value={MOCK_WALLET_ADDRESS} />
 						<DetailRow

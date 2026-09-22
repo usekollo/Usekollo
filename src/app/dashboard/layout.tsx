@@ -21,13 +21,13 @@ export const metadata: Metadata = {
 // dashboard apps.
 export default function DashboardLayout({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex h-screen flex-col overflow-hidden bg-background md:bg-grey-lighter">
+		<div className="flex h-screen flex-col overflow-hidden bg-background lg:bg-grey-lighter">
 			<DashboardHeader />
 
-			<div className="flex min-h-0 flex-1 flex-col md:flex-row md:gap-6 md:px-8 md:py-6">
+			<div className="flex min-h-0 flex-1 flex-col lg:flex-row lg:gap-6 lg:px-8 lg:py-6">
 				<DashboardSidebar />
 
-				<main className="flex-1 overflow-y-auto px-4 pt-6 pb-20 md:rounded-3xl md:bg-white md:p-8 md:shadow-xs">
+				<main className="flex-1 overflow-y-auto px-4 pt-6 pb-20 lg:rounded-3xl lg:bg-white lg:p-8 lg:shadow-xs">
 					{children}
 				</main>
 			</div>

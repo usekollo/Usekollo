@@ -57,11 +57,11 @@ export default function ActivityPage() {
 
 	if (!data || data.activity.length === 0) {
 		return (
-			<div className="flex flex-col items-center px-4 py-16 text-center md:py-24">
+			<div className="flex flex-col items-center px-4 py-16 text-center lg:py-24">
 				<span className="flex size-20 items-center justify-center rounded-full bg-grey-lighter text-grey-dark">
 					<Clock className="size-8" strokeWidth={1.5} />
 				</span>
-				<h1 className="mt-6 text-2xl font-medium text-foreground md:text-3xl">No Activity Yet</h1>
+				<h1 className="mt-6 text-2xl font-medium text-foreground lg:text-3xl">No Activity Yet</h1>
 				<p className="mt-2 max-w-sm text-sm text-grey-normal">
 					Your deposits, withdrawals, and transfers will show up here once you make one.
 				</p>
@@ -71,13 +71,13 @@ export default function ActivityPage() {
 
 	return (
 		<div className="space-y-6">
-			<div className="hidden items-center gap-2 text-sm md:flex">
+			<div className="hidden items-center gap-2 text-sm lg:flex">
 				<span className="font-medium text-foreground">Activity</span>
 			</div>
 
 			{/* Mobile: status + month filter pills (month is decorative — no date
 			    grouping model to back it yet) */}
-			<div className="flex items-center gap-2 md:hidden">
+			<div className="flex items-center gap-2 lg:hidden">
 				<div className="relative">
 					<select
 						value={statusFilter}
@@ -98,7 +98,7 @@ export default function ActivityPage() {
 			</div>
 
 			{/* Desktop: search + status toggle + filter button */}
-			<div className="hidden items-center gap-3 md:flex">
+			<div className="hidden items-center gap-3 lg:flex">
 				<div className="relative flex-1">
 					<Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-grey-light-active" />
 					<Input type="search" placeholder="Search hash, type, or asset..." className="h-11 pl-11" />
@@ -125,7 +125,7 @@ export default function ActivityPage() {
 			</div>
 
 			{/* Mobile: plain divided list, not individual cards */}
-			<div className="divide-y divide-border rounded-3xl bg-white md:hidden">
+			<div className="divide-y divide-border rounded-3xl bg-white lg:hidden">
 				{filtered.map((item) => (
 					<div key={item.id} className="flex items-center gap-3 px-4 py-4">
 						<ActivityIcon item={item} />
@@ -138,7 +138,7 @@ export default function ActivityPage() {
 			</div>
 
 			{/* Desktop table + pagination */}
-			<div className="hidden md:block">
+			<div className="hidden lg:block">
 				<table className="w-full text-left text-sm">
 					<thead>
 						<tr className="text-xs font-medium text-grey-light-active">

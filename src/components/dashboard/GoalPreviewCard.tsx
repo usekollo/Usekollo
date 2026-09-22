@@ -25,18 +25,18 @@ export default function GoalPreviewCard({
 	const displayAmount = formatMoney(targetAmount || 0);
 
 	return (
-		<div className="rounded-3xl bg-primary p-6 text-primary-foreground md:divide-y md:divide-border md:rounded-3xl md:bg-white md:p-0 md:text-foreground">
-			<div className="hidden md:block md:px-6 md:py-5">
+		<div className="rounded-3xl bg-primary p-6 text-primary-foreground lg:divide-y lg:divide-border lg:rounded-3xl lg:bg-white lg:p-0 lg:text-foreground">
+			<div className="hidden lg:block lg:px-6 lg:py-5">
 				<h2 className="text-lg font-medium">{name || "Untitled Goal"}</h2>
 			</div>
 
-			<div className="md:px-6 md:py-5">
-				<p className="text-xs font-medium tracking-wide uppercase opacity-80 md:text-grey-normal md:opacity-100">
+			<div className="lg:px-6 lg:py-5">
+				<p className="text-xs font-medium tracking-wide uppercase opacity-80 lg:text-grey-normal lg:opacity-100">
 					Target Amount
 				</p>
 				<p className="mt-2 flex items-baseline gap-2 text-4xl font-semibold">
 					{displayAmount}
-					<span className="text-base font-medium opacity-80 md:text-grey-normal md:opacity-100">
+					<span className="text-base font-medium opacity-80 lg:text-grey-normal lg:opacity-100">
 						{asset || "USDC"}
 					</span>
 				</p>
@@ -44,16 +44,16 @@ export default function GoalPreviewCard({
 
 			<div
 				className={cn(
-					"mt-5 flex items-center justify-between md:mt-0 md:px-6 md:py-5",
+					"mt-5 flex items-center justify-between lg:mt-0 lg:px-6 lg:py-5",
 				)}
 			>
 				<div>
-					<p className="text-xs font-medium tracking-wide uppercase opacity-80 md:text-grey-normal md:opacity-100">
+					<p className="text-xs font-medium tracking-wide uppercase opacity-80 lg:text-grey-normal lg:opacity-100">
 						Target Date
 					</p>
 					<p className="mt-1 text-sm">{formatTargetDate(targetDate)}</p>
 				</div>
-				<span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium md:bg-blue-light md:text-primary">
+				<span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium lg:bg-blue-light lg:text-primary">
 					DRAFT
 				</span>
 			</div>

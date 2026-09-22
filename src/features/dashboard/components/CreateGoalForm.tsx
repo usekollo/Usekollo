@@ -63,7 +63,7 @@ export default function CreateGoalForm() {
 	return (
 		<Form {...form}>
 			{/* Desktop-only breadcrumb, mirrors the typed name live */}
-			<div className="mb-6 hidden items-center gap-2 text-sm text-grey-light-active md:flex">
+			<div className="mb-6 hidden items-center gap-2 text-sm text-grey-light-active lg:flex">
 				<Link
 					href={pageRoutes.dashboardRoutes.DASHBOARD}
 					className="flex items-center gap-2 hover:text-grey-normal"
@@ -75,7 +75,7 @@ export default function CreateGoalForm() {
 				<span className="font-medium text-foreground">{name || "Untitled Goal"}</span>
 			</div>
 
-			<form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-start">
+			<form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
 				<GoalPreviewCard
 					name={name}
 					targetAmount={targetAmount}
@@ -83,7 +83,7 @@ export default function CreateGoalForm() {
 					targetDate={targetDate}
 				/>
 
-				<div className="space-y-5 md:rounded-3xl md:bg-white md:p-6 md:shadow-xs">
+				<div className="space-y-5 lg:rounded-3xl lg:bg-white lg:p-6 lg:shadow-xs">
 					<FormField
 						control={form.control}
 						name="name"
@@ -172,7 +172,7 @@ export default function CreateGoalForm() {
 					size="xl"
 					isLoading={isPending}
 					disabled={!isValid}
-					className="w-full md:col-start-1 md:w-auto md:px-10"
+					className="w-full lg:col-start-1 lg:w-auto lg:px-10"
 				>
 					<Plus className="size-4" />
 					Create New Goal

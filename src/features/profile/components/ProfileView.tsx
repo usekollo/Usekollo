@@ -78,7 +78,7 @@ function ConnectionTab() {
 
 	return (
 		<>
-			<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">
+			<div className="rounded-3xl bg-white p-6 shadow-xs lg:p-8">
 				<div className="flex items-center justify-between">
 					<h2 className="text-lg font-medium text-foreground">Connection</h2>
 					<Link2 className="size-5 text-primary" />
@@ -194,7 +194,7 @@ function PersonalDetailsTab() {
 	};
 
 	return (
-		<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">
+		<div className="rounded-3xl bg-white p-6 shadow-xs lg:p-8">
 			<h2 className="text-lg font-medium text-foreground">Personal Details</h2>
 
 			<div className="mt-6 flex items-center gap-4">
@@ -271,7 +271,7 @@ function SecurityTab() {
 	};
 
 	return (
-		<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">
+		<div className="rounded-3xl bg-white p-6 shadow-xs lg:p-8">
 			<h2 className="text-lg font-medium text-foreground">Change Password</h2>
 
 			<Form {...form}>
@@ -350,7 +350,7 @@ function LogoutSection() {
 
 	return (
 		<>
-			<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">
+			<div className="rounded-3xl bg-white p-6 shadow-xs lg:p-8">
 				<div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 					<div>
 						<h2 className="text-lg font-medium text-foreground">Log Out</h2>
@@ -409,7 +409,7 @@ export default function ProfileView() {
 
 	return (
 		<div className="space-y-6">
-			<div className="hidden items-center gap-2 text-sm md:flex">
+			<div className="hidden items-center gap-2 text-sm lg:flex">
 				<span className="font-medium text-foreground">Profile Settings</span>
 			</div>
 
