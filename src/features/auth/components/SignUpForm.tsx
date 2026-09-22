@@ -13,13 +13,14 @@ import InputField from "@/components/ui/custom/InputField";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { pageRoutes } from "@/lib/config/routes";
 import { SignUpSchema, SignUpValues } from "@/lib/validations/authValidations";
-import { useRegister } from "../hooks";
+import { useGoogleSignIn, useRegister } from "../hooks";
 
 // Figma-referenced "Connect Wallet"-adjacent screen: no Figma node for Sign
 // Up was fetched (built from the pasted screenshot), so this mirrors
 // LoginForm's structure/pattern with the fields that screen actually shows.
 export default function SignUpForm() {
 	const { mutate: register, isPending } = useRegister();
+	const { mutate: signInWithGoogle, isPending: isGooglePending } = useGoogleSignIn();
 	const [acceptedTerms, setAcceptedTerms] = useState(false);
 
 	const form = useForm<SignUpValues>({
@@ -48,9 +49,16 @@ export default function SignUpForm() {
 
 	return (
 		<div className="space-y-6">
-			<Button variant="outline" size="xl" className="w-full">
+			<Button
+				type="button"
+				variant="outline"
+				size="xl"
+				className="w-full"
+				disabled={isGooglePending}
+				onClick={() => signInWithGoogle()}
+			>
 				<Image src="/images/icons/google.svg" alt="" width={17} height={17} aria-hidden />
-				Continue with Google
+				{isGooglePending ? "Redirecting…" : "Continue with Google"}
 			</Button>
 
 			<div className="relative flex items-center justify-center">

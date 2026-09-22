@@ -1,8 +1,7 @@
 // Central place for every backend endpoint — reference `apiRoutes.x` from
-// feature hooks instead of hardcoding path strings. Fill these in to match
-// your actual backend as it comes together.
+// feature hooks instead of hardcoding path strings.
 export const apiRoutes = {
-	health: "/health",
+	health: "/api/health",
 
 	auth: {
 		REGISTER: "/api/v1/auth/register",
@@ -18,5 +17,32 @@ export const apiRoutes = {
 
 	users: {
 		ME: "/api/v1/users/me",
+		CHANGE_PASSWORD: "/api/v1/users/me/password",
+		AVATAR: "/api/v1/users/me/avatar",
+	},
+
+	wallet: {
+		STATUS: "/api/v1/wallet",
+		CHALLENGE: "/api/v1/wallet/challenge",
+		CONNECT: "/api/v1/wallet/connect",
+		DISCONNECT: "/api/v1/wallet/disconnect",
+		// POST prepares an unsigned changeTrust, PUT submits the signed one.
+		TRUSTLINE: "/api/v1/wallet/trustline",
+	},
+
+	dashboard: {
+		SUMMARY: "/api/v1/dashboard/summary",
+	},
+
+	goals: {
+		DETAIL: (id: string) => `/api/v1/goals/${id}`,
+	},
+
+	// The two halves of the non-custodial write path: the server builds and
+	// simulates the transaction, Freighter signs it in the browser, and the
+	// server submits the signed result. See features/dashboard/hooks.
+	tx: {
+		PREPARE: "/api/v1/tx/prepare",
+		SUBMIT: "/api/v1/tx/submit",
 	},
 };

@@ -9,8 +9,8 @@ import WalletIcon from "@/components/icons/WalletIcon";
 import { useGoal } from "@/features/dashboard/hooks";
 import { GoalStatus } from "@/features/dashboard/types";
 import { pageRoutes } from "@/lib/config/routes";
-import { MOCK_WALLET_ADDRESS } from "@/lib/mocks/dashboardMocks";
-import { cn, formatMoney, formatMonthYear } from "@/lib/utils";
+import { useWalletConnection } from "@/features/profile/hooks";
+import { cn, formatAddress, formatMoney, formatMonthYear } from "@/lib/utils";
 
 const badgeClass: Record<GoalStatus, string> = {
 	running: "bg-blue-light text-primary",
@@ -75,6 +75,7 @@ function GoalActivityEmptyState() {
 // (or saved >= target), not a separate route.
 export default function GoalDetailView({ goalId }: { goalId: string }) {
 	const { data: goal, isLoading } = useGoal(goalId);
+	const { data: wallet } = useWalletConnection();
 
 	if (isLoading) {
 		return (
@@ -293,7 +294,7 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 				<div className="rounded-3xl bg-white md:p-8 md:shadow-xs">
 					<div className="divide-y divide-border px-4 md:px-0">
 						<DetailRow label="Target Name" value={goal.name} />
-						<DetailRow label="Recipient Address" value={MOCK_WALLET_ADDRESS} />
+						<DetailRow label="Recipient Address" value={formatAddress(wallet?.address)} />
 						<DetailRow
 							label="Settlement Asset"
 							value={`${goal.currency} (Native)`}

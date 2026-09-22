@@ -19,6 +19,7 @@ import {
 	useDisconnectWallet,
 	useProfile,
 	useUpdateProfile,
+	useUploadAvatar,
 	useWalletConnection,
 } from "@/features/profile/hooks";
 import { ChangePasswordSchema, ChangePasswordValues, PersonalDetailsSchema, PersonalDetailsValues } from "@/lib/validations/profileValidations";
@@ -154,6 +155,7 @@ function ConnectionTab() {
 function PersonalDetailsTab() {
 	const { data, isLoading } = useProfile();
 	const { mutate: updateProfile, isPending } = useUpdateProfile();
+	const { mutate: uploadAvatar, isPending: isUploading } = useUploadAvatar();
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
 	const form = useForm<PersonalDetailsValues>({
@@ -179,18 +181,33 @@ function PersonalDetailsTab() {
 
 	const avatarSrc = avatarPreview ?? data.avatarUrl;
 
+	// The local preview shows the chosen image straight away while the upload
+	// runs, so picking a photo still feels instant. The upload itself is what
+	// actually saves it — once it lands, `data.avatarUrl` holds the stored URL
+	// and the preview is dropped so the real image takes over.
 	const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (!file) return;
+
 		const reader = new FileReader();
 		reader.onload = () => setAvatarPreview(reader.result as string);
 		reader.readAsDataURL(file);
+
+		uploadAvatar(file, {
+			onSuccess: () => setAvatarPreview(null),
+			// Drop the preview so the avatar reverts to what is actually
+			// stored, rather than showing an image that was never saved.
+			onError: () => setAvatarPreview(null),
+		});
+
+		// Let the same file be picked again after a failure.
+		event.target.value = "";
 	};
 
 	const onSubmit = (values: PersonalDetailsValues) => {
-		// Email isn't editable here (see PersonalDetailsSchema) — send the
-		// account's existing address through unchanged.
-		updateProfile({ ...values, email: data.email, avatarUrl: avatarSrc });
+		// Only the name: email is not editable (see PersonalDetailsSchema) and
+		// the photo saves through its own upload the moment it is chosen.
+		updateProfile(values);
 	};
 
 	return (
@@ -198,9 +215,12 @@ function PersonalDetailsTab() {
 			<h2 className="text-lg font-medium text-foreground">Personal Details</h2>
 
 			<div className="mt-6 flex items-center gap-4">
+				{/* Not ProfileAvatar: this one has to show `avatarPreview`, the
+				    locally-selected file, before the upload completes — the header's
+				    avatar only ever renders what is actually stored. */}
 				<span className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-grey-lighter text-grey-dark">
 					{avatarSrc ? (
-						// eslint-disable-next-line @next/next/no-img-element -- a user-picked data: URL, not a static/remote asset the image optimizer can help with
+						// eslint-disable-next-line @next/next/no-img-element -- a local object URL or an object-storage URL; the optimizer helps with neither
 						<img src={avatarSrc} alt="" className="size-full object-cover" />
 					) : (
 						<UserRound className="size-8" />
@@ -209,8 +229,14 @@ function PersonalDetailsTab() {
 				<div>
 					<label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-grey-lighter">
 						<Camera className="size-4" />
-						Change Photo
-						<input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+						{isUploading ? "Uploading…" : "Change Photo"}
+						<input
+							type="file"
+							accept="image/jpeg,image/png,image/webp"
+							onChange={handleAvatarChange}
+							disabled={isUploading}
+							className="hidden"
+						/>
 					</label>
 					<p className="mt-2 text-xs text-grey-normal">JPG or PNG, up to 2MB.</p>
 				</div>

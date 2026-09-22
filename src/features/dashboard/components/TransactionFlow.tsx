@@ -9,11 +9,18 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import WalletIcon from "@/components/icons/WalletIcon";
-import { useAddSavings, useDashboardSummary, useGoal, useWithdraw } from "@/features/dashboard/hooks";
+import {
+	useAddSavings,
+	useAddTrustline,
+	useDashboardSummary,
+	useGoal,
+	useWithdraw,
+} from "@/features/dashboard/hooks";
 import { GoalStatus } from "@/features/dashboard/types";
 import { pageRoutes } from "@/lib/config/routes";
-import { AddSavingsResult, MOCK_WALLET_ADDRESS } from "@/lib/mocks/dashboardMocks";
-import { formatMoney } from "@/lib/utils";
+import { useWalletConnection } from "@/features/profile/hooks";
+import { AddSavingsResult } from "@/features/dashboard/types";
+import { formatAddress, formatMoney } from "@/lib/utils";
 
 export type TransactionMode = "deposit" | "withdraw";
 
@@ -161,6 +168,7 @@ function ReviewStep({
 	onCancel: () => void;
 }) {
 	const copy = COPY[mode];
+	const { data: wallet } = useWalletConnection();
 
 	return (
 		<div className="p-6 sm:p-8">
@@ -182,7 +190,7 @@ function ReviewStep({
 					<span className="flex size-6 items-center justify-center rounded-md bg-grey-dark text-white">
 						<WalletIcon className="size-3.5" />
 					</span>
-					{MOCK_WALLET_ADDRESS}
+					{formatAddress(wallet?.address)}
 				</div>
 			</div>
 
@@ -350,6 +358,7 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 	const { data: summary } = useDashboardSummary();
 	const deposit = useAddSavings(goalId);
 	const withdraw = useWithdraw(goalId);
+	const trustline = useAddTrustline();
 	const mutation = mode === "deposit" ? deposit : withdraw;
 	const copy = COPY[mode];
 
@@ -396,10 +405,21 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 		);
 	}
 
-	const availableBalance = mode === "deposit" ? (summary?.balance ?? 0) : goal.saved;
+	// A deposit moves the *goal's* asset out of the wallet, so it has to be
+	// checked against that asset. `summary.balance` is always the headline
+	// asset (XLM) — using it here let a USDC deposit the wallet could not
+	// fund through to the chain, where it died as a bare 502.
+	const walletBalance = summary?.balances?.[goal.currency];
+	const availableBalance = mode === "deposit" ? (walletBalance?.amount ?? 0) : goal.saved;
+
+	// No trustline means the wallet cannot hold this asset at all — the
+	// contract's transfer would revert with TrustlineMissing. Say so here
+	// rather than after the user has approved a doomed transaction.
+	const needsTrustline = mode === "deposit" && summary != null && walletBalance?.available === false;
+
 	const amountNum = Number(amount) || 0;
 	const remainingToTarget = Math.max(0, goal.target - goal.saved);
-	const isValidAmount = amountNum > 0 && amountNum <= availableBalance;
+	const isValidAmount = amountNum > 0 && amountNum <= availableBalance && !needsTrustline;
 
 	const addQuickAmount = (value: number) => {
 		setAmount((prev) => String((Number(prev) || 0) + value));
@@ -536,6 +556,29 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 								</span>
 							</div>
 						</div>
+
+						{needsTrustline ? (
+							<div className="space-y-3 rounded-2xl bg-blue-light p-4">
+								<p className="text-sm text-foreground">
+									Your wallet can&apos;t hold {goal.currency} yet. Enabling it adds a{" "}
+									{goal.currency} trustline — a one-off step that locks up 0.5 XLM as a network
+									reserve, refunded if you ever remove it.
+								</p>
+								<Button
+									onClick={() => trustline.mutate(goal.currency)}
+									size="lg"
+									className="w-full"
+									disabled={trustline.isPending}
+								>
+									{trustline.isPending ? "Enabling…" : `Enable ${goal.currency}`}
+								</Button>
+							</div>
+						) : amountNum > availableBalance ? (
+							<p className="rounded-2xl bg-grey-lighter p-4 text-sm text-grey-normal">
+								That&apos;s more {goal.currency} than your wallet holds — you have{" "}
+								{formatMoney(availableBalance)} {goal.currency} available.
+							</p>
+						) : null}
 
 						<div className="space-y-3">
 							<Button onClick={handleReview} size="xl" className="w-full" disabled={!isValidAmount}>

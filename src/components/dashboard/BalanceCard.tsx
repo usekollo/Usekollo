@@ -11,8 +11,18 @@ import { formatMoney } from "@/lib/utils";
 // same button, just two render sites toggled per breakpoint rather than
 // portalled, since that's simplest here.
 export default function BalanceCard({ data }: { data: DashboardSummary }) {
-	const totalSaved = data.goals.reduce((sum, goal) => sum + goal.saved, 0);
-	const totalTarget = data.goals.reduce((sum, goal) => sum + goal.target, 0);
+	// "Total Balance" is the money currently saved *in the app* — the sum of
+	// what each goal is holding in the contract — not the wallet balance.
+	// `data.balance` is the wallet, which the header chip and the deposit cap
+	// in TransactionFlow both need, so it stays as it is and is simply not
+	// what this card headlines.
+	//
+	// Only goals denominated in the currency on the chip are counted. Goals
+	// can be XLM or USDC, and adding those together would produce a number
+	// that is not an amount of anything.
+	const inCurrency = data.goals.filter((goal) => goal.currency === data.currency);
+	const totalSaved = inCurrency.reduce((sum, goal) => sum + goal.saved, 0);
+	const totalTarget = inCurrency.reduce((sum, goal) => sum + goal.target, 0);
 	const progress = totalTarget > 0 ? Math.min(100, (totalSaved / totalTarget) * 100) : 0;
 
 	return (
@@ -25,7 +35,7 @@ export default function BalanceCard({ data }: { data: DashboardSummary }) {
 				</span>
 			</div>
 
-			<p className="mt-2 text-4xl font-semibold md:text-5xl">{formatMoney(data.balance)}</p>
+			<p className="mt-2 text-4xl font-semibold md:text-5xl">{formatMoney(totalSaved)}</p>
 
 			<div className="mt-5 h-1.5 rounded-full bg-white/25">
 				<div className="h-1.5 rounded-full bg-white" style={{ width: `${progress}%` }} />
@@ -45,7 +55,7 @@ export default function BalanceCard({ data }: { data: DashboardSummary }) {
 			<div className="mt-4 flex items-center justify-between text-xs opacity-80">
 				<span>Ongoing Goals</span>
 				<span>
-					${formatMoney(data.amountToNextGoal)} to Next Goal
+					{formatMoney(data.amountToNextGoal)} {data.currency} to Next Goal
 				</span>
 			</div>
 		</div>

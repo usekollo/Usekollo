@@ -1,13 +1,15 @@
 "use client";
 
-import { Bell, ChevronLeft, Search, UserRound } from "lucide-react";
+import { Bell, ChevronLeft, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import WalletIcon from "@/components/icons/WalletIcon";
+import ProfileAvatar from "./ProfileAvatar";
 import { Input } from "@/components/ui/input";
-import { useGoal } from "@/features/dashboard/hooks";
+import { useGoal, useDashboardSummary } from "@/features/dashboard/hooks";
+import { useWalletConnection } from "@/features/profile/hooks";
 import { pageRoutes } from "@/lib/config/routes";
-import { MOCK_WALLET_ADDRESS } from "@/lib/mocks/dashboardMocks";
+import { formatAddress, formatMoney } from "@/lib/utils";
 
 // On mobile, a bottom-nav tab's own root route (/dashboard, .../goals,
 // .../activity, .../profile) always gets the normal logo/bell/avatar
@@ -53,10 +55,14 @@ function getMobileSubRouteHeader(pathname: string, goalName: string | undefined)
 // on the routes above, a close button + page title instead). No live
 // wallet/notification data yet — the balance/address here are the same
 // mock figures used throughout the landing page mockups, not a real
-// connection. The avatar is a generic icon rather than a photo — not
-// fabricating a stand-in person for it.
+// connection. The avatar is the user's uploaded photo (see ProfileAvatar),
+// falling back to a generic icon when they have not set one.
 export default function DashboardHeader() {
 	const pathname = usePathname();
+	// Both are already cached by the dashboard pages, so the header chip reuses
+	// them rather than issuing requests of its own.
+	const { data: summary } = useDashboardSummary();
+	const { data: wallet } = useWalletConnection();
 	const detailMatch = pathname.match(GOAL_DETAIL_PATTERN);
 	const goalId = detailMatch && detailMatch[1] !== "new" ? detailMatch[1] : undefined;
 	const { data: goal } = useGoal(goalId);
@@ -98,13 +104,13 @@ export default function DashboardHeader() {
 							<span className="flex size-8 items-center justify-center rounded-md bg-grey-dark text-white">
 								<WalletIcon className="size-4" />
 							</span>
-							<span className="font-semibold text-blue-darker">2,480.00 USDC</span>
+							<span className="font-semibold text-blue-darker">
+								{formatMoney(summary?.balance ?? 0)} {summary?.currency ?? "XLM"}
+							</span>
 							<span className="h-4 w-px bg-grey-light-active" />
-							<span className="text-grey-light-active">{MOCK_WALLET_ADDRESS}</span>
+							<span className="text-grey-light-active">{formatAddress(wallet?.address)}</span>
 						</div>
-						<span className="flex size-10 items-center justify-center rounded-full bg-blue-light text-primary">
-							<UserRound className="size-5" />
-						</span>
+						<ProfileAvatar className="size-10" iconClassName="size-5" />
 					</div>
 				</div>
 
@@ -145,9 +151,7 @@ export default function DashboardHeader() {
 							<span className="flex size-9 items-center justify-center rounded-full bg-blue-light text-primary">
 								<Bell className="size-4" />
 							</span>
-							<span className="flex size-9 items-center justify-center rounded-full bg-blue-light text-primary">
-								<UserRound className="size-4" />
-							</span>
+							<ProfileAvatar className="size-9" iconClassName="size-4" />
 						</div>
 					</div>
 				)}

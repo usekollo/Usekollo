@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (lint, typecheck, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  contract:
+    name: Contract (fmt, clippy, test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contract
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Skip if contract not yet scaffolded
+        id: check
+        run: echo "exists=$( [ -f Cargo.toml ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+      - run: cargo fmt --check
+        if: steps.check.outputs.exists == 'true'
+      - run: cargo clippy --all-targets -- -D warnings
+        if: steps.check.outputs.exists == 'true'
+      - run: cargo test
+        if: steps.check.outputs.exists == 'true'
