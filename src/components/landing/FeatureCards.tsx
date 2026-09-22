@@ -82,7 +82,7 @@ export default function FeatureCards() {
 			initial="hidden"
 			whileInView="show"
 			viewport={viewport}
-			className="custom-container grid gap-6 pb-16 md:grid-cols-[1fr_2fr] md:pb-24"
+			className="custom-container grid gap-6 overflow-hidden pb-16 md:grid-cols-[1fr_2fr] md:pb-24"
 		>
 			<CardShell
 				title="Stay in control"

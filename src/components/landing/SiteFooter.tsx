@@ -10,7 +10,7 @@ export default function SiteFooter() {
 			initial="hidden"
 			whileInView="show"
 			viewport={viewport}
-			className="custom-container flex flex-col items-center gap-4 py-10 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left"
+			className="custom-container flex flex-col items-center gap-4 overflow-hidden py-10 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left"
 		>
 			<div className="flex items-center gap-2">
 				{/* eslint-disable-next-line @next/next/no-img-element -- local vector asset, no benefit from the raster optimizer */}

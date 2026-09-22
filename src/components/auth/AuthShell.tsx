@@ -26,7 +26,7 @@ export default function AuthShell({
 			<main className="flex flex-1 items-center justify-center px-4 py-16 md:py-10">
 				<div
 					className={cn(
-						"w-full max-w-sm md:max-w-md md:rounded-3xl md:bg-white md:p-10 md:shadow-2xl",
+						"w-full max-w-sm md:max-w-md md:rounded-[43px] md:bg-white md:p-10 md:shadow-2xl",
 						cardClassName,
 					)}
 				>
