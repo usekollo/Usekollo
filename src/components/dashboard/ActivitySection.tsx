@@ -1,9 +1,19 @@
-import { ArrowDownLeft, ArrowUpRight, Clock, ExternalLink, Search, SlidersHorizontal, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { ArrowDownLeft, ArrowUpRight, Clock, ExternalLink, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityItem, ActivityStatus } from "@/features/dashboard/types";
+import { useMemo, useState } from "react";
+import { filterActivity } from "@/lib/domain/activity-filter";
 import { cn, formatMoney } from "@/lib/utils";
+
+const STATUS_TABS: { label: string; value: ActivityStatus | "all" }[] = [
+	{ label: "All", value: "all" },
+	{ label: "Success", value: "success" },
+	{ label: "Pending", value: "pending" },
+	{ label: "Failed", value: "failed" },
+];
 
 export const statusBadge: Record<ActivityStatus, string> = {
 	success: "bg-blue-light text-primary",
@@ -57,6 +67,16 @@ export default function ActivitySection({
 	activity: ActivityItem[];
 	hideHeading?: boolean;
 }) {
+	// The search and status controls below are desktop-only, so on mobile
+	// these stay at their defaults and `visible` is simply the full list.
+	const [query, setQuery] = useState("");
+	const [status, setStatus] = useState<ActivityStatus | "all">("all");
+
+	const visible = useMemo(
+		() => filterActivity(activity, { query, status }),
+		[activity, query, status],
+	);
+
 	return (
 		<div>
 			{!hideHeading && (
@@ -69,7 +89,7 @@ export default function ActivitySection({
 			)}
 
 			{/* Mobile: card list */}
-			<div className="mt-3 space-y-3 lg:hidden">
+			<div className="mt-3 space-y-3 md:hidden">
 				{activity.map((item) => (
 					<div key={item.id} className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-xs">
 						<ActivityIcon item={item} />
@@ -88,19 +108,27 @@ export default function ActivitySection({
 						<Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-grey-light-active" />
 						<Input
 							type="search"
+							value={query}
+							onChange={(event) => setQuery(event.target.value)}
 							placeholder="Search hash, type, or asset..."
 							className="h-11 pl-11"
 						/>
 					</div>
 					<div className="flex shrink-0 items-center gap-1 rounded-full bg-grey-lighter p-1 text-sm font-medium">
-						<button className="rounded-full bg-grey-dark px-4 py-1.5 text-white">All</button>
-						<button className="px-4 py-1.5 text-grey-normal">Success</button>
-						<button className="px-4 py-1.5 text-grey-normal">Failed</button>
+						{STATUS_TABS.map(({ label, value }) => (
+							<button
+								key={value}
+								type="button"
+								onClick={() => setStatus(value)}
+								className={cn(
+									"rounded-full px-4 py-1.5 transition-colors",
+									status === value ? "bg-grey-dark text-white" : "text-grey-normal",
+								)}
+							>
+								{label}
+							</button>
+						))}
 					</div>
-					<Button variant="outline" className="shrink-0 border-grey-light-active">
-						<SlidersHorizontal className="size-4" />
-						Filter
-					</Button>
 				</div>
 
 				<table className="mt-4 w-full text-left text-sm">
@@ -117,7 +145,7 @@ export default function ActivitySection({
 						</tr>
 					</thead>
 					<tbody>
-						{activity.map((item) => (
+						{visible.map((item) => (
 							<tr key={item.id} className="border-t border-border">
 								<td className="py-4">
 									<span className="flex items-center gap-2">

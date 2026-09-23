@@ -10,7 +10,7 @@ import InputField from "@/components/ui/custom/InputField";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { pageRoutes } from "@/lib/config/routes";
 import { SignInSchema, SignInValues } from "@/lib/validations/authValidations";
-import { useLogin } from "../hooks";
+import { useGoogleSignIn, useLogin } from "../hooks";
 
 // Figma "Sign In" (node 207-12268): Google button -> "OR EMAIL" divider ->
 // email/password fields -> remember-me -> submit -> sign-up footer link.
@@ -20,6 +20,7 @@ import { useLogin } from "../hooks";
 // module. Copy this shape for new forms.
 export default function LoginForm() {
 	const { mutate: login, isPending } = useLogin();
+	const { mutate: signInWithGoogle, isPending: isGooglePending } = useGoogleSignIn();
 
 	const form = useForm<SignInValues>({
 		resolver: zodResolver(SignInSchema),
@@ -40,9 +41,16 @@ export default function LoginForm() {
 
 	return (
 		<div className="space-y-6">
-			<Button variant="outline" size="xl" className="w-full">
+			<Button
+				type="button"
+				variant="outline"
+				size="xl"
+				className="w-full"
+				disabled={isGooglePending}
+				onClick={() => signInWithGoogle()}
+			>
 				<Image src="/images/icons/google.svg" alt="" width={17} height={17} aria-hidden />
-				Continue with Google
+				{isGooglePending ? "Redirecting…" : "Continue with Google"}
 			</Button>
 
 			<div className="relative flex items-center justify-center">

@@ -1,22 +1,83 @@
 "use client";
 
-import type { ReactElement } from "react";
-import { ArrowRight, Fingerprint, QrCode, Sailboat, X } from "lucide-react";
+import { useSyncExternalStore, type ReactElement } from "react";
+import { ArrowRight, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import WalletIcon from "@/components/icons/WalletIcon";
-
-const wallets = [
-	{ name: "Freighter Wallet", icon: Sailboat },
-	{ name: "Albedo", icon: Fingerprint },
-	{ name: "WalletConnect", icon: QrCode },
-];
+import { useConnectWallet } from "@/features/profile/hooks";
+import { pageRoutes } from "@/lib/config/routes";
+import { useIsAuthenticated } from "@/lib/stores/userAuthStore";
+import { walletAvailability, type WalletAvailability } from "@/lib/wallet/kit";
 
 // No dedicated Figma node for this — built from the "Connect Wallet" modal
-// screenshot the user pasted. Actual wallet connection (Freighter/Albedo/
-// WalletConnect SDKs) isn't wired up yet, so each row just surfaces a
-// "coming soon" toast instead of doing nothing silently.
+// screenshot the user pasted.
+//
+// This used to list three wallets, only one of which worked. Wallet choice now
+// belongs to Stellar Wallets Kit's own picker (lib/wallet/kit), which lists
+// exactly the wallets actually available on this device, so reproducing a
+// hardcoded list here would only be a second, less accurate menu in front of
+// the real one. Ownership is still proven before the account is linked — see
+// features/profile/hooks useConnectWallet.
+// Split by device: every wallet here except WalletConnect and Albedo is a
+// browser extension, and extensions do not exist on mobile browsers.
+//
+// Freighter still belongs in the mobile sentence, though. It has a phone app,
+// and the kit's WalletConnect module features it by wallet id alongside Lobstr
+// and Scopuly (see wallet-connect.module.js `featuredWalletIds`) — its own
+// module deliberately reports unavailable on mobile and defers to WalletConnect
+// instead. So Freighter is reachable on a phone; it just is not called
+// "Freighter" in the picker. Leaving it unnamed is what makes someone holding
+// it look for a button that is not there and conclude the app cannot see it.
+const SUPPORTED_DESKTOP =
+	"Freighter, xBull, Albedo, Rabet, Lobstr, Hana, and any wallet over WalletConnect.";
+const SUPPORTED_MOBILE =
+	"On a phone, choose WalletConnect — that's how Freighter, Lobstr and other mobile wallets connect. Albedo also works.";
+const UNSUPPORTED_MOBILE =
+	"Wallet connections aren't available on mobile yet — open UseKollo on a desktop browser with a Stellar wallet extension.";
+
+// Desktop is the safe assumption for markup rendered before any user agent is
+// known: it is the common case, and it never disables the button.
+const SERVER_AVAILABILITY: WalletAvailability = {
+	isMobile: false,
+	walletConnectReady: true,
+	strandedOnMobile: false,
+};
+
+const subscribeToNothing = () => () => {};
+const serverSnapshot = () => SERVER_AVAILABILITY;
+
 export default function ConnectWalletModal({ trigger }: { trigger: ReactElement }) {
+	const router = useRouter();
+	const isAuthenticated = useIsAuthenticated();
+	const { mutate: connect, isPending } = useConnectWallet();
+
+	// There is no user agent on the server, so the first paint has to assume
+	// desktop and the real answer arrives on hydration. useSyncExternalStore is
+	// what keeps those two renders from disagreeing — both values are constant
+	// for the life of the page, hence the no-op subscribe.
+	const availability = useSyncExternalStore(subscribeToNothing, walletAvailability, serverSnapshot);
+
+	const stranded = availability.strandedOnMobile;
+	const supportText = stranded
+		? UNSUPPORTED_MOBILE
+		: availability.isMobile
+			? SUPPORTED_MOBILE
+			: SUPPORTED_DESKTOP;
+
+	// A wallet is linked *to an account*, so there has to be one first. This
+	// modal is reachable from the landing page, where there usually isn't.
+	const handleConnect = () => {
+		if (!isAuthenticated) {
+			toast.info("Sign in first, then connect your wallet.");
+			router.push(pageRoutes.authRoutes.SIGN_IN);
+			return;
+		}
+
+		connect();
+	};
+
 	return (
 		<Dialog>
 			<DialogTrigger render={trigger} />
@@ -34,21 +95,23 @@ export default function ConnectWalletModal({ trigger }: { trigger: ReactElement 
 						</DialogClose>
 					</div>
 
-					<div className="mt-8 space-y-4">
-						{wallets.map(({ name, icon: Icon }) => (
-							<button
-								key={name}
-								type="button"
-								onClick={() => toast.info(`${name} support is coming soon`)}
-								className="flex w-full items-center gap-4 rounded-3xl bg-grey-lighter p-4 text-left transition-colors hover:bg-grey-light"
-							>
-								<span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-blue-light text-primary">
-									<Icon className="size-5" />
-								</span>
-								<span className="flex-1 text-base font-medium text-foreground">{name}</span>
-								<ArrowRight className="size-5 shrink-0 text-grey-light-active" />
-							</button>
-						))}
+					<div className="mt-8">
+						<button
+							type="button"
+							disabled={isPending || stranded}
+							onClick={handleConnect}
+							className="flex w-full items-center gap-4 rounded-3xl bg-grey-lighter p-4 text-left transition-colors hover:bg-grey-light disabled:opacity-60"
+						>
+							<span className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-blue-light text-primary">
+								<WalletIcon className="size-5" />
+							</span>
+							<span className="flex-1 text-base font-medium text-foreground">
+								{isPending ? "Check your wallet…" : "Choose a wallet"}
+							</span>
+							<ArrowRight className="size-5 shrink-0 text-grey-light-active" />
+						</button>
+
+						<p className="mt-4 text-sm text-grey-normal">{supportText}</p>
 					</div>
 				</div>
 

@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageRoutes } from "@/lib/config/routes";
+import { useIsAuthenticated } from "@/lib/stores/userAuthStore";
+import WalletIcon from "@/components/icons/WalletIcon";
 
 // No docs site yet, so no "Documentation" link — just the two sections
 // this same page actually has.
@@ -23,11 +25,18 @@ const navLinks = [
 // rather than the full wordmark SVG, since no exported asset combines them
 // this way.
 //
-// The right-side action is always Sign In / Get Started — wallet connection
-// happens inside the app (Profile > Connection) once someone has an
-// account, not from the marketing page.
+// The right-side action swaps on auth state: signed-in visitors get a link
+// into the dashboard; signed-out visitors get Sign In / Get Started instead,
+// since there's no account yet to attach a wallet to.
+//
+// Connecting a wallet deliberately does not happen from here. Linking is an
+// overwrite — it replaces whatever address the account already has, which
+// hides that wallet's goals and history until it is reconnected — so it
+// belongs behind Profile > Connection, where the current address is visible
+// and disconnecting is an explicit step.
 export default function SiteHeader() {
 	const [open, setOpen] = useState(false);
+	const isAuthenticated = useIsAuthenticated();
 
 	return (
 		<>
@@ -60,11 +69,20 @@ export default function SiteHeader() {
 						))}
 					</nav>
 
-					<div className="hidden items-center gap-3 md:flex">
-						<Button href={pageRoutes.authRoutes.SIGN_IN} variant="ghost">
-							Sign In
-						</Button>
-						<Button href={pageRoutes.authRoutes.SIGN_UP}>Get Started</Button>
+					<div className="hidden md:inline-flex">
+						{isAuthenticated ? (
+							<Button href={pageRoutes.dashboardRoutes.DASHBOARD}>
+								<WalletIcon className="size-4 text-primary-foreground" />
+								Go to Dashboard
+							</Button>
+						) : (
+							<div className="flex items-center gap-3">
+								<Button href={pageRoutes.authRoutes.SIGN_IN} variant="ghost">
+									Sign In
+								</Button>
+								<Button href={pageRoutes.authRoutes.SIGN_UP}>Get Started</Button>
+							</div>
+						)}
 					</div>
 
 					<button
@@ -127,14 +145,29 @@ export default function SiteHeader() {
 											{link.label}
 										</a>
 									))}
-									<div className="flex flex-col gap-3">
-										<Button href={pageRoutes.authRoutes.SIGN_IN} variant="outline" className="w-full">
-											Sign In
+									{isAuthenticated ? (
+										<Button
+											href={pageRoutes.dashboardRoutes.DASHBOARD}
+											className="w-full"
+											onClick={() => setOpen(false)}
+										>
+											<WalletIcon className="size-4 text-primary-foreground" />
+											Go to Dashboard
 										</Button>
-										<Button href={pageRoutes.authRoutes.SIGN_UP} className="w-full">
-											Get Started
-										</Button>
-									</div>
+									) : (
+										<div className="flex flex-col gap-3">
+											<Button
+												href={pageRoutes.authRoutes.SIGN_IN}
+												variant="outline"
+												className="w-full"
+											>
+												Sign In
+											</Button>
+											<Button href={pageRoutes.authRoutes.SIGN_UP} className="w-full">
+												Get Started
+											</Button>
+										</div>
+									)}
 								</motion.div>
 							</motion.div>
 						)}

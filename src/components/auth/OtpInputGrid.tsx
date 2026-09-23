@@ -1,9 +1,8 @@
 "use client";
 
 import { OTPField } from "@base-ui/react/otp-field";
+import { OTP_LENGTH } from "@/lib/auth-otp";
 import { cn } from "@/lib/utils";
-
-const OTP_LENGTH = 6;
 
 // The 6-box code entry shared by every OTP screen (email verification,
 // password reset) — just the input grid; each screen owns its own

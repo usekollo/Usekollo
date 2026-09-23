@@ -25,6 +25,14 @@ export function formatMonthYear(value: string) {
 	return date.toLocaleDateString("en-US", { month: "short", year: "numeric" }).toUpperCase();
 }
 
+// "GCJ7X...Q3F9A" — a Stellar public key is 56 characters, which no layout
+// in this app has room for. Every address the UI shows goes through here.
+export function formatAddress(address: string | null | undefined, lead = 4, tail = 4) {
+	if (!address) return "Not connected";
+	if (address.length <= lead + tail + 3) return address;
+	return `${address.slice(0, lead)}...${address.slice(-tail)}`;
+}
+
 export function getApiErrorMessage(
 	error: unknown,
 	fallback = "Something went wrong. Please try again.",

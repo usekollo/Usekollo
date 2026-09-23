@@ -3,7 +3,9 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { pageRoutes } from "@/lib/config/routes";
+import { useIsAuthenticated } from "@/lib/stores/userAuthStore";
 import { fadeUp, staggerContainer, zoomIn } from "@/lib/utils/animations";
+import WalletIcon from "@/components/icons/WalletIcon";
 
 // Figma "Landing Page" hero (104-3807 desktop / 104-5087 mobile). The phone
 // mockup is the actual exported Figma asset (public/images/hero-img.svg,
@@ -22,6 +24,8 @@ import { fadeUp, staggerContainer, zoomIn } from "@/lib/utils/animations";
 // site-wide, and FeatureCards.tsx/SiteFooter.tsx for the other two sections
 // that needed it individually.
 export default function HeroSection() {
+	const isAuthenticated = useIsAuthenticated();
+
 	return (
 		<section className="overflow-hidden bg-grey-lighter">
 			<div className="custom-container grid gap-12 py-16 lg:grid-cols-2 lg:items-center lg:py-28">
@@ -42,17 +46,30 @@ export default function HeroSection() {
 						around the goals that matter.
 					</motion.p>
 					<motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
-						<Button href={pageRoutes.authRoutes.SIGN_UP} size="xl" className="w-full sm:w-60">
-							Get Started
-						</Button>
-						<Button
-							href={pageRoutes.authRoutes.SIGN_IN}
-							size="xl"
-							variant="outline"
-							className="w-full sm:w-60"
-						>
-							Sign In
-						</Button>
+						{isAuthenticated ? (
+							<Button
+								href={pageRoutes.dashboardRoutes.DASHBOARD}
+								size="xl"
+								className="w-full sm:w-60"
+							>
+								<WalletIcon className="size-4 text-primary-foreground" />
+								Go to Dashboard
+							</Button>
+						) : (
+							<>
+								<Button href={pageRoutes.authRoutes.SIGN_UP} size="xl" className="w-full sm:w-60">
+									Get Started
+								</Button>
+								<Button
+									href={pageRoutes.authRoutes.SIGN_IN}
+									size="xl"
+									variant="outline"
+									className="w-full sm:w-60"
+								>
+									Sign In
+								</Button>
+							</>
+						)}
 					</motion.div>
 				</motion.div>
 
