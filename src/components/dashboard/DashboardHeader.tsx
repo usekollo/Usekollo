@@ -2,7 +2,8 @@
 
 import { Bell, ChevronLeft, Search } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import WalletIcon from "@/components/icons/WalletIcon";
 import ProfileAvatar from "./ProfileAvatar";
 import { Input } from "@/components/ui/input";
@@ -52,13 +53,50 @@ function getMobileSubRouteHeader(pathname: string, goalName: string | undefined)
 
 // Desktop shows a search bar and a connected-wallet balance chip + avatar;
 // mobile normally swaps that for a notification bell + profile icon (or,
-// on the routes above, a close button + page title instead). No live
-// wallet/notification data yet — the balance/address here are the same
-// mock figures used throughout the landing page mockups, not a real
-// connection. The avatar is the user's uploaded photo (see ProfileAvatar),
-// falling back to a generic icon when they have not set one.
+// on the routes above, a close button + page title instead). The avatar is
+// the user's uploaded photo (see ProfileAvatar), falling back to a generic
+// icon when they have not set one.
+//
+// Both icons are links, not decoration — they rendered as bare spans for a
+// while, which looked identical and did nothing when tapped. The bell points
+// at the activity feed: there is no notifications store behind it yet, and
+// the feed is the closest thing to the list a user expects to find there.
 export default function DashboardHeader() {
 	const pathname = usePathname();
+	const router = useRouter();
+	const [search, setSearch] = useState("");
+
+	// Typing searches — waiting for Enter looked broken, because nothing about a
+	// search box says a keystroke is not enough. The debounce is what makes that
+	// affordable: the activity register is a different route, so reacting to
+	// every keystroke would mean a navigation per character.
+	//
+	// Held in a ref so the effect below can tell a first search (push, so Back
+	// returns to the page the user came from) from refining one already running
+	// (replace, so Back is not a trail of half-typed queries).
+	const hasNavigated = useRef(false);
+
+	useEffect(() => {
+		const query = search.trim();
+
+		// One character matches most of the feed, which is noise rather than a
+		// result — and it would yank the user off whatever page they are on.
+		if (query.length < 2) return;
+
+		const timer = setTimeout(() => {
+			const href = `${pageRoutes.dashboardRoutes.ACTIVITY}?q=${encodeURIComponent(query)}`;
+			if (hasNavigated.current) router.replace(href, { scroll: false });
+			else router.push(href, { scroll: false });
+			hasNavigated.current = true;
+		}, 350);
+
+		return () => clearTimeout(timer);
+	}, [search, router]);
+
+	// Leaving the register ends the run, so the next search pushes again.
+	useEffect(() => {
+		if (pathname !== pageRoutes.dashboardRoutes.ACTIVITY) hasNavigated.current = false;
+	}, [pathname]);
 	// Both are already cached by the dashboard pages, so the header chip reuses
 	// them rather than issuing requests of its own.
 	const { data: summary } = useDashboardSummary();
@@ -93,10 +131,31 @@ export default function DashboardHeader() {
 					<span className="h-6 w-px shrink-0 bg-border" />
 
 					<div className="flex-1">
-						<div className="relative max-w-xl">
+						{/* The header sits on every dashboard page, but the thing being
+						    searched only lives on one — so this hands the query to the
+						    activity register rather than filtering whatever page is open. */}
+						<form
+							className="relative max-w-xl"
+							onSubmit={(event) => {
+								// Enter still works, and skips the debounce.
+								event.preventDefault();
+								const query = search.trim();
+								if (!query) return;
+								router.push(`${pageRoutes.dashboardRoutes.ACTIVITY}?q=${encodeURIComponent(query)}`, {
+									scroll: false,
+								});
+								hasNavigated.current = true;
+							}}
+						>
 							<Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-grey-light-active" />
-							<Input type="search" placeholder="Txn Hash or ID..." className="h-11 pl-11" />
-						</div>
+							<Input
+								type="search"
+								value={search}
+								onChange={(event) => setSearch(event.target.value)}
+								placeholder="Txn Hash or ID..."
+								className="h-11 pl-11"
+							/>
+						</form>
 					</div>
 
 					<div className="ml-auto flex items-center gap-3">
@@ -110,7 +169,13 @@ export default function DashboardHeader() {
 							<span className="h-4 w-px bg-grey-light-active" />
 							<span className="text-grey-light-active">{formatAddress(wallet?.address)}</span>
 						</div>
-						<ProfileAvatar className="size-10" iconClassName="size-5" />
+						<Link
+							href={pageRoutes.dashboardRoutes.PROFILE}
+							aria-label="Profile"
+							className="shrink-0 rounded-full"
+						>
+							<ProfileAvatar className="size-10" iconClassName="size-5" />
+						</Link>
 					</div>
 				</div>
 
@@ -148,10 +213,20 @@ export default function DashboardHeader() {
 						</Link>
 
 						<div className="ml-auto flex items-center gap-2">
-							<span className="flex size-9 items-center justify-center rounded-full bg-blue-light text-primary">
+							<Link
+								href={pageRoutes.dashboardRoutes.ACTIVITY}
+								aria-label="Activity"
+								className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-light text-primary"
+							>
 								<Bell className="size-4" />
-							</span>
-							<ProfileAvatar className="size-9" iconClassName="size-4" />
+							</Link>
+							<Link
+								href={pageRoutes.dashboardRoutes.PROFILE}
+								aria-label="Profile"
+								className="shrink-0 rounded-full"
+							>
+								<ProfileAvatar className="size-9" iconClassName="size-4" />
+							</Link>
 						</div>
 					</div>
 				)}

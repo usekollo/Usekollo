@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageRoutes } from "@/lib/config/routes";
+import { reportError } from "@/lib/report-error";
 
 // Root app/error.tsx — catches unhandled errors anywhere below the root
 // layout. `retry` (stable as of Next 16.3, see node_modules/next/dist/docs
@@ -18,8 +19,7 @@ export default function Error({
 	retry: () => void;
 }) {
 	useEffect(() => {
-		// TODO: send to an error-reporting service once one is wired up
-		console.error(error);
+		reportError(error, "app/error.tsx");
 	}, [error]);
 
 	return (

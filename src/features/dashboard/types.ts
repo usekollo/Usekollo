@@ -21,7 +21,16 @@ export type ActivityDirection = "in" | "out";
 
 export interface ActivityItem {
 	id: string;
+	/** Shortened for display, e.g. "7f3a9c...2b8e". Never search this. */
 	hash: string;
+	/**
+	 * The untruncated transaction hash.
+	 *
+	 * Search has to run against this: the feed only ever *shows* the short
+	 * form, so matching on that meant pasting a real hash — the one thing the
+	 * search box asks for — could never find anything.
+	 */
+	fullHash: string;
 	operation: string;
 	dateTime: string;
 	amount: number;
@@ -45,6 +54,9 @@ export interface DashboardSummary {
 	currency: string;
 	/** Every supported asset, so a USDC goal can be checked against USDC. */
 	balances: Record<string, AssetBalance>;
+	/** Computed across every goal at once, so it mixes XLM and USDC targets and
+	 *  is only meaningful while one asset is in play. BalanceCard scopes its own
+	 *  per selected currency rather than reading this. */
 	amountToNextGoal: number;
 	goals: Goal[];
 	activity: ActivityItem[];

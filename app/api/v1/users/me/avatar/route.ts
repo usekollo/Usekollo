@@ -69,6 +69,10 @@ export async function POST(request: Request) {
         fullName: data.full_name,
         email: data.email,
         avatarUrl: data.avatar_url,
+        // Untouched here, but the client replaces the whole ["profile"] cache
+        // entry with this response — leaving it out would blank the flag and
+        // show a password user the "set a password" panel until the next load.
+        hasPassword: user.hasPassword,
       },
       "Photo updated.",
     );

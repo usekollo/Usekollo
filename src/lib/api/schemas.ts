@@ -114,3 +114,16 @@ export const submitTrustlineSchema = z.object({
   asset: z.string().min(1, "Choose an asset"),
   xdr: z.string().min(1, "A signed transaction is required"),
 });
+
+// -- telemetry ------------------------------------------------------------
+
+// Bounded hard rather than generously: /telemetry/error is unauthenticated, so
+// every field here is something an anonymous caller can put in our logs.
+export const clientErrorSchema = z.object({
+  message: z.string().max(500),
+  digest: z.string().max(100).optional(),
+  stack: z.string().max(4_000).optional(),
+  context: z.string().max(200).optional(),
+  url: z.string().max(500).optional(),
+  userAgent: z.string().max(200).optional(),
+});

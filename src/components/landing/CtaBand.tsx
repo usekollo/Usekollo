@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { pageRoutes } from "@/lib/config/routes";
 import { useIsAuthenticated } from "@/lib/stores/userAuthStore";
 import { staggerContainer, viewport, zoomIn } from "@/lib/utils/animations";
-import ConnectWalletModal from "./ConnectWalletModal";
 import WalletIcon from "@/components/icons/WalletIcon";
 
 export default function CtaBand() {
@@ -36,14 +35,15 @@ export default function CtaBand() {
 					className="mt-8 flex flex-wrap items-center justify-center gap-3"
 				>
 					{isAuthenticated ? (
-						<ConnectWalletModal
-							trigger={
-								<Button size="lg" variant="light" className="sm:w-60">
-									<WalletIcon className="size-4" />
-									Connect Wallet
-								</Button>
-							}
-						/>
+						<Button
+							href={pageRoutes.dashboardRoutes.DASHBOARD}
+							size="lg"
+							variant="light"
+							className="sm:w-60"
+						>
+							<WalletIcon className="size-4" />
+							Go to Dashboard
+						</Button>
 					) : (
 						<>
 							<Button href={pageRoutes.authRoutes.SIGN_UP} size="lg" variant="light" className="sm:w-60">

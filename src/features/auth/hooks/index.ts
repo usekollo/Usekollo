@@ -30,9 +30,19 @@ type LoginResponse = AuthTokensData & {
 
 export const useRegister = () => {
 	const router = useRouter();
+	const resetSession = useAuthStore((state) => state.resetSession);
 
 	return useMutation({
 		mutationFn: async (values: RegisterPayload) => {
+			// Before the request, not after. Registering establishes a new
+			// identity, so any session already in this browser has to go first —
+			// otherwise the sign-up -> verify -> dashboard flow lands the new
+			// user in whoever was signed in here before, since /register issues
+			// no session of its own and the stale cookie still satisfies
+			// `isAuthenticated`. Clearing up front also means an abandoned or
+			// failed registration cannot leave the old account reachable.
+			resetSession();
+
 			const { data } = await axiosPublic.post<ApiSuccessResponse<null>>(
 				apiRoutes.auth.REGISTER,
 				values,
@@ -54,9 +64,16 @@ export const useRegister = () => {
 export const useLogin = () => {
 	const router = useRouter();
 	const login = useAuthStore((state) => state.login);
+	const resetSession = useAuthStore((state) => state.resetSession);
 
 	return useMutation({
 		mutationFn: async (values: LoginPayload) => {
+			// `login()` clears the previous identity too, but only once the
+			// request succeeds. Dropping it here as well means a *failed*
+			// sign-in attempt cannot leave the previous account signed in and
+			// reachable on a shared browser.
+			resetSession();
+
 			const { data } = await axiosPublic.post<ApiSuccessResponse<LoginResponse>>(
 				apiRoutes.auth.LOGIN,
 				values,

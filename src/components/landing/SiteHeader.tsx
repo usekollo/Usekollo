@@ -6,7 +6,6 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { pageRoutes } from "@/lib/config/routes";
 import { useIsAuthenticated } from "@/lib/stores/userAuthStore";
-import ConnectWalletModal from "./ConnectWalletModal";
 import WalletIcon from "@/components/icons/WalletIcon";
 
 // No docs site yet, so no "Documentation" link — just the two sections
@@ -26,10 +25,15 @@ const navLinks = [
 // rather than the full wordmark SVG, since no exported asset combines them
 // this way.
 //
-// The right-side action swaps on auth state: signed-in visitors get
-// "Connect Stellar Wallet" (opens ConnectWalletModal); signed-out visitors
-// get Sign In / Get Started instead, since there's no account yet to attach
-// a wallet to.
+// The right-side action swaps on auth state: signed-in visitors get a link
+// into the dashboard; signed-out visitors get Sign In / Get Started instead,
+// since there's no account yet to attach a wallet to.
+//
+// Connecting a wallet deliberately does not happen from here. Linking is an
+// overwrite — it replaces whatever address the account already has, which
+// hides that wallet's goals and history until it is reconnected — so it
+// belongs behind Profile > Connection, where the current address is visible
+// and disconnecting is an explicit step.
 export default function SiteHeader() {
 	const [open, setOpen] = useState(false);
 	const isAuthenticated = useIsAuthenticated();
@@ -67,14 +71,10 @@ export default function SiteHeader() {
 
 					<div className="hidden md:inline-flex">
 						{isAuthenticated ? (
-							<ConnectWalletModal
-								trigger={
-									<Button>
-										<WalletIcon className="size-4 text-primary-foreground" />
-										Connect Stellar Wallet
-									</Button>
-								}
-							/>
+							<Button href={pageRoutes.dashboardRoutes.DASHBOARD}>
+								<WalletIcon className="size-4 text-primary-foreground" />
+								Go to Dashboard
+							</Button>
 						) : (
 							<div className="flex items-center gap-3">
 								<Button href={pageRoutes.authRoutes.SIGN_IN} variant="ghost">
@@ -146,14 +146,14 @@ export default function SiteHeader() {
 										</a>
 									))}
 									{isAuthenticated ? (
-										<ConnectWalletModal
-											trigger={
-												<Button className="w-full">
-													<WalletIcon className="size-4 text-primary-foreground" />
-													Connect Stellar Wallet
-												</Button>
-											}
-										/>
+										<Button
+											href={pageRoutes.dashboardRoutes.DASHBOARD}
+											className="w-full"
+											onClick={() => setOpen(false)}
+										>
+											<WalletIcon className="size-4 text-primary-foreground" />
+											Go to Dashboard
+										</Button>
 									) : (
 										<div className="flex flex-col gap-3">
 											<Button

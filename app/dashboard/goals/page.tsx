@@ -1,12 +1,24 @@
 "use client";
 
-import { ChevronDown, Plus, Target } from "lucide-react";
+import { Plus, Target } from "lucide-react";
+import { useMemo, useState } from "react";
 import ActivitySection, { ActivitySectionSkeleton } from "@/components/dashboard/ActivitySection";
 import BalanceCard, { BalanceCardSkeleton } from "@/components/dashboard/BalanceCard";
 import GoalCard, { GoalCardSkeleton } from "@/components/dashboard/GoalCard";
 import { Button } from "@/components/ui/button";
 import { useDashboardSummary } from "@/features/dashboard/hooks";
 import { pageRoutes } from "@/lib/config/routes";
+import { cn } from "@/lib/utils";
+
+// Statuses a goal can be listed under. "Withdrawn" is deliberately its own
+// option rather than folded into active: the contract distinguishes a goal
+// someone emptied from one never funded, and hiding that distinction here
+// would lose the only place a user can see it.
+const GOAL_FILTERS: { label: string; value: string }[] = [
+	{ label: "All Goals", value: "all" },
+	{ label: "In Progress", value: "active" },
+	{ label: "Completed", value: "done" },
+];
 
 // Built from the pasted "Savings Goals" screenshots — the root goals list
 // (reuses BalanceCard/GoalCard/ActivitySection as-is), its own empty state
@@ -16,6 +28,17 @@ import { pageRoutes } from "@/lib/config/routes";
 // as BalanceCard's currency pill — no real filtering yet.
 export default function SavingsGoalsPage() {
 	const { data, isLoading } = useDashboardSummary();
+	const [goalFilter, setGoalFilter] = useState("all");
+
+	const visibleGoals = useMemo(() => {
+		if (!data) return [];
+		if (goalFilter === "all") return data.goals;
+		// "active" covers anything still being saved into, including a goal that
+		// was emptied and has a target left to hit.
+		return data.goals.filter((goal) =>
+			goalFilter === "done" ? goal.status === "done" : goal.status !== "done",
+		);
+	}, [data, goalFilter]);
 
 	if (isLoading) {
 		return (
@@ -68,39 +91,53 @@ export default function SavingsGoalsPage() {
 		<div className="space-y-6">
 			<div className="hidden items-center justify-between md:flex">
 				<span className="text-xs font-medium tracking-wide text-foreground uppercase">Savings Goals</span>
-				<div className="flex items-center gap-3">
-					<button
-						type="button"
-						className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-medium text-foreground"
-					>
-						Last 30 Days
-						<ChevronDown className="size-3.5" />
-					</button>
-					<button
-						type="button"
-						className="flex items-center gap-1 rounded-full border border-border px-4 py-2 text-xs font-medium text-foreground"
-					>
-						All Goals
-						<ChevronDown className="size-3.5" />
-					</button>
+				{/* A "Last 30 Days" pill used to sit alongside these. It is gone
+				    rather than wired: the UI goal carries no creation date, so
+				    there is nothing to filter a date range against. */}
+				<div className="flex items-center gap-2">
+					{GOAL_FILTERS.map(({ label, value }) => (
+						<button
+							key={value}
+							type="button"
+							onClick={() => setGoalFilter(value)}
+							className={cn(
+								"rounded-full border px-4 py-2 text-xs font-medium transition-colors",
+								goalFilter === value
+									? "border-grey-dark bg-grey-dark text-white"
+									: "border-border text-foreground",
+							)}
+						>
+							{label}
+						</button>
+					))}
 				</div>
 			</div>
 
 			{/* Mobile-only filter pill */}
-			<button
-				type="button"
-				className="flex items-center gap-1 rounded-full border border-border bg-white px-4 py-2 text-xs font-medium text-foreground md:hidden"
-			>
-				All Goals
-				<ChevronDown className="size-3.5" />
-			</button>
+			<div className="flex items-center gap-2 md:hidden">
+				{GOAL_FILTERS.map(({ label, value }) => (
+					<button
+						key={value}
+						type="button"
+						onClick={() => setGoalFilter(value)}
+						className={cn(
+							"rounded-full border px-4 py-2 text-xs font-medium transition-colors",
+							goalFilter === value
+								? "border-grey-dark bg-grey-dark text-white"
+								: "border-border bg-white text-foreground",
+						)}
+					>
+						{label}
+					</button>
+				))}
+			</div>
 
 			<div className="flex flex-col gap-6 md:flex-row">
 				<div className="md:w-2/5">
 					<BalanceCard data={data} />
 				</div>
 				<div className="space-y-3 md:flex-1">
-					{data.goals.map((goal) => (
+					{visibleGoals.map((goal) => (
 						<GoalCard key={goal.id} goal={goal} href={pageRoutes.dashboardRoutes.GOAL_DETAIL(goal.id)} />
 					))}
 				</div>

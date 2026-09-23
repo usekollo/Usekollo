@@ -16,6 +16,15 @@ export async function POST(request: Request) {
     const user = await requireUser(request);
     const { currentPassword, newPassword } = changePasswordSchema.parse(await readJson(request));
 
+    // A Google-only account has no password, so the sign-in below could never
+    // succeed and would report "that is not your current password" — which
+    // reads as a typo and sends the user looking for something they never had.
+    if (!user.hasPassword) {
+      throw badRequest(
+        "This account signs in with Google and has no password yet. Use \"Forgot password\" on the sign-in page to set one.",
+      );
+    }
+
     const auth = createSupabaseAuthClient();
     const { error: signInError } = await auth.auth.signInWithPassword({
       email: user.email,

@@ -23,6 +23,8 @@ import {
 	useWalletConnection,
 } from "@/features/profile/hooks";
 import { ChangePasswordSchema, ChangePasswordValues, PersonalDetailsSchema, PersonalDetailsValues } from "@/lib/validations/profileValidations";
+import { pageRoutes } from "@/lib/config/routes";
+import { useWalletAvailability } from "@/lib/wallet/use-availability";
 import { cn } from "@/lib/utils";
 
 type TabId = "connection" | "personal" | "security";
@@ -44,6 +46,10 @@ function ConnectionTab() {
 	const disconnect = useDisconnectWallet();
 	const connect = useConnectWallet();
 	const [confirmOpen, setConfirmOpen] = useState(false);
+	// Every wallet except WalletConnect and Albedo is a browser extension, and
+	// extensions do not exist on mobile browsers. This is now the only place a
+	// wallet can be connected from, so the check has to live here.
+	const { strandedOnMobile } = useWalletAvailability();
 
 	if (isLoading) {
 		return <Skeleton className="h-72 w-full rounded-3xl" />;
@@ -57,9 +63,17 @@ function ConnectionTab() {
 				</span>
 				<h2 className="mt-6 text-xl font-medium text-foreground">No Wallet Connected</h2>
 				<p className="mt-2 max-w-sm text-sm text-grey-normal">
-					Connect a Stellar wallet to sync your balance and start saving toward your goals.
+					{strandedOnMobile
+						? "Wallet connections aren't available on mobile yet — open UseKollo on a desktop browser with a Stellar wallet extension."
+						: "Connect a Stellar wallet to sync your balance and start saving toward your goals."}
 				</p>
-				<Button onClick={() => connect.mutate()} isLoading={connect.isPending} size="xl" className="mt-6">
+				<Button
+					onClick={() => connect.mutate()}
+					isLoading={connect.isPending}
+					disabled={strandedOnMobile}
+					size="xl"
+					className="mt-6"
+				>
 					<Plus className="size-4" />
 					Connect Wallet
 				</Button>
@@ -277,7 +291,35 @@ function PersonalDetailsTab() {
 	);
 }
 
+/**
+ * Offered instead of the change-password form on a Google-only account.
+ *
+ * That form cannot succeed there: the API verifies the current password by
+ * signing in with it, and an account created through Google has no password
+ * to verify. Showing it anyway meant the user was told their current password
+ * was wrong no matter what they typed.
+ *
+ * "Forgot password" is the route that does work — it sets a password through
+ * the admin API rather than checking an existing one, so it is as good at
+ * creating a first password as at replacing a forgotten one.
+ */
+function SetPasswordPanel() {
+	return (
+		<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">
+			<h2 className="text-lg font-medium text-foreground">Password</h2>
+			<p className="mt-2 text-sm text-grey-normal">
+				You sign in with Google, so this account doesn&apos;t have a password yet. You can set one
+				and then use either method to sign in.
+			</p>
+			<Button href={pageRoutes.authRoutes.FORGOT_PASSWORD} size="xl" className="mt-6">
+				Set a password
+			</Button>
+		</div>
+	);
+}
+
 function SecurityTab() {
+	const { data: profile, isLoading } = useProfile();
 	const { mutate: changePassword, isPending } = useChangePassword();
 
 	const form = useForm<ChangePasswordValues>({
@@ -295,6 +337,20 @@ function SecurityTab() {
 	const onSubmit = (values: ChangePasswordValues) => {
 		changePassword(values, { onSuccess: () => form.reset() });
 	};
+
+	// Rendered only once it is known which panel applies — showing the form and
+	// then swapping it out would let someone start typing into a form that is
+	// about to disappear.
+	if (isLoading) {
+		return (
+			<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">
+				<Skeleton className="h-6 w-40" />
+				<Skeleton className="mt-6 h-12 w-full" />
+			</div>
+		);
+	}
+
+	if (profile && !profile.hasPassword) return <SetPasswordPanel />;
 
 	return (
 		<div className="rounded-3xl bg-white p-6 shadow-xs md:p-8">

@@ -31,6 +31,31 @@ export class WalletRejectedError extends Error {
   }
 }
 
+/**
+ * Thrown when the page is not a secure context, which WalletConnect needs.
+ *
+ * WalletConnect encrypts every message to the relay, and its crypto goes
+ * through WebCrypto (`crypto.subtle`, via @noble/ciphers). Browsers only expose
+ * `crypto.subtle` in a secure context: HTTPS, or localhost. On a phone pointed
+ * at a dev server over the LAN — http://192.168.x.x:3000 — it is `undefined`,
+ * so the pairing cannot be built and the picker fails with nothing that says
+ * why.
+ *
+ * This is a development problem, not a production one: a deployed site is
+ * served over HTTPS and satisfies this automatically. It is checked anyway
+ * because the failure is otherwise indistinguishable from "mobile wallets do
+ * not work", which is the wrong conclusion to draw.
+ */
+export class InsecureContextError extends Error {
+  constructor() {
+    super(
+      "Mobile wallets need a secure connection. Open this site over HTTPS — " +
+        "a plain http:// address on your network cannot connect a wallet.",
+    );
+    this.name = "InsecureContextError";
+  }
+}
+
 export class WalletUnavailableError extends Error {
   constructor() {
     super("No Stellar wallet is available. Install one, then try again.");
@@ -55,15 +80,85 @@ function rethrow(error: unknown, fallback: string): never {
   throw new Error(message);
 }
 
+/**
+ * Whether this is a phone or tablet.
+ *
+ * Coarse on purpose — it only decides which wallets we *claim* to support, so
+ * a misread costs a slightly wrong sentence, never a blocked connection. The
+ * picker itself still lists whatever is genuinely available.
+ */
+export function isMobileDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+}
+
+/**
+ * What a user on this device can realistically connect with.
+ *
+ * Freighter, Rabet, Hana, Lobstr and xBull are browser extensions: they do not
+ * exist on mobile browsers, so on a phone the only routes to a wallet are
+ * WalletConnect and Albedo's hosted popup. WalletConnect in turn needs a
+ * project id — without one that module is never registered (see ensureInit),
+ * which on mobile leaves the picker effectively empty.
+ */
+export interface WalletAvailability {
+  isMobile: boolean;
+  walletConnectReady: boolean;
+  /** True when this device has no practical way to connect at all. */
+  strandedOnMobile: boolean;
+}
+
+// Both flags below have to outlive this *module*, not just this page.
+//
+// Fast Refresh re-runs a file and everything importing it on every edit
+// (node_modules/next/dist/docs/03-architecture/fast-refresh.md), so plain
+// module-level state resets mid-session. For the availability snapshot that
+// only costs a wasted object; for `initialised` it means StellarWalletsKit.init
+// runs again and stands up a *second* WalletConnect Core on the same project
+// id. Two relay sockets is not harmless: the pairing the wallet approves can
+// belong to the client that is no longer being awaited, so the phone shows
+// "connected" while the page waits forever. Hanging both off globalThis makes
+// re-evaluation a no-op.
+interface WalletKitState {
+  /**
+   * Computed once and handed back by reference — useSyncExternalStore compares
+   * snapshots by identity and would re-render forever on a fresh object.
+   */
+  availability: WalletAvailability | null;
+  initialised: boolean;
+}
+
+declare global {
+  var __kolloWalletKit: WalletKitState | undefined;
+}
+
+const state: WalletKitState = (globalThis.__kolloWalletKit ??= {
+  availability: null,
+  initialised: false,
+});
+
+export function walletAvailability(): WalletAvailability {
+  if (state.availability) return state.availability;
+
+  const isMobile = isMobileDevice();
+  const walletConnectReady = Boolean(publicEnv.walletConnectProjectId);
+
+  state.availability = {
+    isMobile,
+    walletConnectReady,
+    strandedOnMobile: isMobile && !walletConnectReady,
+  };
+
+  return state.availability;
+}
+
 /** Testnet vs public, derived from the passphrase the app is built against. */
 function network(): Networks {
   return publicEnv.networkPassphrase === Networks.PUBLIC ? Networks.PUBLIC : Networks.TESTNET;
 }
 
-let initialised = false;
-
 function ensureInit(): void {
-  if (initialised) return;
+  if (state.initialised) return;
 
   const modules = [
     new FreighterModule(),
@@ -94,10 +189,20 @@ function ensureInit(): void {
         ],
       }),
     );
+  } else if (isMobileDevice()) {
+    // On desktop a missing project id just costs the QR option. On mobile it
+    // removes the *only* practical wallet, and the picker then opens listing
+    // nothing but extensions that cannot exist there — which reads as a broken
+    // app rather than a missing deploy-time variable.
+    console.error(
+      "[wallet] NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. WalletConnect " +
+        "is the only wallet most phones can use, so mobile users cannot connect. " +
+        "Set it in the deployment environment, not just .env.",
+    );
   }
 
   StellarWalletsKit.init({ modules, network: network() });
-  initialised = true;
+  state.initialised = true;
 }
 
 /**
@@ -107,6 +212,13 @@ function ensureInit(): void {
  * the user's choice, made in the kit's modal.
  */
 export async function connectWallet(): Promise<string> {
+  // Checked before the picker opens rather than after: on a phone over plain
+  // HTTP the modal would open, list WalletConnect, and then fail on pairing
+  // with an error that names neither the cause nor the fix.
+  if (typeof window !== "undefined" && !window.isSecureContext && isMobileDevice()) {
+    throw new InsecureContextError();
+  }
+
   ensureInit();
 
   try {
@@ -115,6 +227,7 @@ export async function connectWallet(): Promise<string> {
     return address;
   } catch (error) {
     if (error instanceof WalletRejectedError) throw error;
+    if (error instanceof InsecureContextError) throw error;
     rethrow(error, "Could not connect to a wallet.");
   }
 }

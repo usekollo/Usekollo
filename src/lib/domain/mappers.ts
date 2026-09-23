@@ -79,6 +79,7 @@ export function toUiActivity(row: ActivityRow): ActivityItem {
   return {
     id: row.id,
     hash: truncateHash(row.tx_hash),
+    fullHash: row.tx_hash,
     operation: describeOperation(row.type, row.goal_name),
     dateTime: formatDateTime(row.created_at),
     amount: row.amount ? Number(row.amount) : 0,

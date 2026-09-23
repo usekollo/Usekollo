@@ -16,6 +16,7 @@ export async function GET(request: Request) {
       fullName: user.fullName,
       email: user.email,
       avatarUrl: user.avatarUrl,
+      hasPassword: user.hasPassword,
     });
   });
 }
@@ -56,6 +57,10 @@ export async function PATCH(request: Request) {
         fullName: data.full_name,
         email: data.email,
         avatarUrl: data.avatar_url,
+        // Unchanged by this route, but the client writes the response straight
+        // into the ["profile"] cache — omitting it would blank the flag and
+        // flip the security tab to the wrong panel after a name change.
+        hasPassword: user.hasPassword,
       },
       "Profile updated.",
     );

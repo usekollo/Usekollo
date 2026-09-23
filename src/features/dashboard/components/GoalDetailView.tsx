@@ -9,6 +9,7 @@ import WalletIcon from "@/components/icons/WalletIcon";
 import { useGoal } from "@/features/dashboard/hooks";
 import { GoalStatus } from "@/features/dashboard/types";
 import { pageRoutes } from "@/lib/config/routes";
+import { monthlyPace } from "@/lib/domain/pace";
 import { useWalletConnection } from "@/features/profile/hooks";
 import { cn, formatAddress, formatMoney, formatMonthYear } from "@/lib/utils";
 
@@ -117,10 +118,19 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 	const percent =
 		goal.target > 0 ? Math.round((goal.saved / goal.target) * 100) : 0;
 	const isDone = goal.status === "done" || goal.saved >= goal.target;
-	// Placeholder heuristic — real "monthly pace" needs a goal creation
-	// date we don't track yet, so this just spreads the target over a
-	// fixed 10 months rather than showing nothing.
-	const monthlyPace = goal.target / 10;
+	// Withdrawing does not require the target to be met — the contract allows
+	// any amount up to what the goal holds, and savings you cannot reach are
+	// not savings. The only real precondition is that there is something in
+	// there: an empty goal would fail on-chain with InsufficientBalance.
+	const canWithdraw = goal.saved > 0;
+	// What is still missing, spread over the months left until the target
+	// date. Replaces a fixed `target / 10`, which ignored both the amount
+	// already saved and when the goal was actually due.
+	const pace = monthlyPace({
+		target: goal.target,
+		saved: goal.saved,
+		targetDate: goal.targetDate,
+	});
 	const totalDisbursed = goal.totalDisbursed ?? goal.target;
 
 	const ringContent = (
@@ -205,7 +215,17 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 								Monthly Pace
 							</p>
 							<p className="mt-1 text-lg font-medium text-foreground">
-								${formatMoney(monthlyPace)}
+								{pace.complete ? "—" : `$${formatMoney(pace.amount)}`}
+							</p>
+							{/* The figure means little without its horizon: the same
+							    amount is reassuring over a year and alarming over a
+							    month. */}
+							<p className="mt-0.5 text-xs text-grey-normal">
+								{pace.complete
+									? "Target reached"
+									: pace.overdue
+										? "Past due — full amount outstanding"
+										: `over ${pace.monthsRemaining} month${pace.monthsRemaining === 1 ? "" : "s"}`}
 							</p>
 						</div>
 						<div>
@@ -254,9 +274,21 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 								<Plus className="size-4" />
 								Add Savings
 							</Button>
-							<Button variant="outline" size="xl" className="w-full" disabled>
-								Withdraw
-							</Button>
+							{canWithdraw ? (
+								<Button
+									href={pageRoutes.dashboardRoutes.WITHDRAW(goal.id)}
+									variant="outline"
+									size="xl"
+									className="w-full"
+								>
+									<WalletIcon className="size-4" />
+									Withdraw
+								</Button>
+							) : (
+								<Button variant="outline" size="xl" className="w-full" disabled>
+									Withdraw
+								</Button>
+							)}
 						</>
 					)}
 				</div>
@@ -282,9 +314,21 @@ export default function GoalDetailView({ goalId }: { goalId: string }) {
 								<Plus className="size-4" />
 								Add Savings
 							</Button>
-							<Button variant="outline" size="xl" className="w-full" disabled>
-								Withdraw
-							</Button>
+							{canWithdraw ? (
+								<Button
+									href={pageRoutes.dashboardRoutes.WITHDRAW(goal.id)}
+									variant="outline"
+									size="xl"
+									className="w-full"
+								>
+									<WalletIcon className="size-4" />
+									Withdraw
+								</Button>
+							) : (
+								<Button variant="outline" size="xl" className="w-full" disabled>
+									Withdraw
+								</Button>
+							)}
 						</>
 					)}
 				</div>

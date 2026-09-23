@@ -112,6 +112,9 @@ pub struct Goal {
 #[repr(u32)]
 pub enum Error {
     NotInitialized = 1,
+    /// Unreachable since setup moved into the constructor — a contract cannot
+    /// be initialised twice when it is initialised by being created. Retained
+    /// so the discriminants below keep their values for existing clients.
     AlreadyInitialized = 2,
     NotFound = 3,
     Unauthorized = 4,
@@ -128,14 +131,23 @@ pub struct Contract;
 
 #[contractimpl]
 impl Contract {
-    /// One-time setup. Sets the admin (who may extend the asset allowlist,
-    /// see spec §5) and the initial allowlist.
-    pub fn initialize(env: Env, admin: Address, allowed_assets: Vec<Address>) -> Result<(), Error> {
+    /// Setup, run as part of deployment itself (spec §5).
+    ///
+    /// This is a constructor, not a callable `initialize`, and the difference
+    /// is a security one. A separate initialize entrypoint authenticates
+    /// whatever address is *passed to it*, and the "already initialized" guard
+    /// only helps whoever gets there first — so anyone watching the network
+    /// could call it in the gap between deploy and the deployer's own call,
+    /// name themselves admin, and own the asset allowlist permanently.
+    ///
+    /// A constructor runs in the same transaction that creates the contract.
+    /// There is no gap to race, and no reachable state in which the contract
+    /// exists but is uninitialised.
+    ///
+    /// `require_auth` is kept so the admin address must consent to the deploy
+    /// rather than simply being named by it.
+    pub fn __constructor(env: Env, admin: Address, allowed_assets: Vec<Address>) {
         admin.require_auth();
-
-        if env.storage().instance().has(&DataKey::Admin) {
-            return Err(Error::AlreadyInitialized);
-        }
 
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage()
@@ -144,8 +156,6 @@ impl Contract {
         // Goal ids are 1-based: 0 is reserved as "no goal", so a caller can
         // never mistake an uninitialised default for a real id.
         env.storage().instance().set(&DataKey::NextGoalId, &1u64);
-
-        Ok(())
     }
 
     /// Admin-gated. Adds one more asset contract address to the allowlist

@@ -387,16 +387,25 @@ export default function TransactionFlow({ goalId, mode }: { goalId: string; mode
 		);
 	}
 
-	// Withdrawals only open up once a goal has actually hit its target (see
-	// GoalDetailView's Withdraw button) — a direct link to this route for an
-	// ongoing goal gets the same friendly guard instead of a broken form.
-	if (mode === "withdraw" && goal.status !== "done" && goal.saved < goal.target) {
+	// Reaching the target is deliberately *not* required to withdraw: the
+	// contract permits any amount up to what the goal holds, and money a user
+	// cannot get back out is not savings. What is required is that the goal
+	// holds something — withdrawing from an empty one fails on-chain with
+	// InsufficientBalance, so it is caught here with an explanation instead.
+	//
+	// `!result` keeps this from eating its own success screen. Withdrawing
+	// everything empties the goal, so the moment the post-transaction state
+	// lands in the cache the goal stops meeting the condition that allowed the
+	// withdrawal — and without this, "Withdrawal Complete" would be replaced by
+	// a message saying there was nothing to withdraw. Once a transaction has
+	// finished, its outcome is the only thing worth showing.
+	if (mode === "withdraw" && !result && goal.saved <= 0) {
 		return (
 			<div className="flex flex-col items-center px-4 py-16 text-center">
-				<h1 className="text-2xl font-medium text-foreground">Not ready to withdraw yet</h1>
+				<h1 className="text-2xl font-medium text-foreground">Nothing to withdraw</h1>
 				<p className="mt-2 max-w-sm text-sm text-grey-normal">
-					&quot;{goal.name}&quot; hasn&apos;t reached its target yet — keep saving and you&apos;ll be able to
-					withdraw once it&apos;s done.
+					&quot;{goal.name}&quot; doesn&apos;t hold any savings yet. Add some first, and you can take
+					them back out whenever you need to.
 				</p>
 				<Button href={pageRoutes.dashboardRoutes.GOAL_DETAIL(goal.id)} size="xl" className="mt-6">
 					Back to Goal

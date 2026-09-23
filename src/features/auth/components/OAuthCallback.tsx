@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { pageRoutes } from "@/lib/config/routes";
 import { useAuthStore } from "@/lib/stores/userAuthStore";
-import { supabase } from "@/lib/supabase/client";
+import { OAUTH_STORAGE_KEY, supabase } from "@/lib/supabase/client";
 
 /**
  * Where Google sends the browser back to.
@@ -84,9 +84,18 @@ export default function OAuthCallback() {
 			// supabase-js persisted its own copy of the session so the PKCE
 			// verifier could survive the redirect. Drop it now the tokens are in
 			// the store, so there is exactly one place that says who is signed in.
-			// `scope: "local"` clears this browser only — it does not revoke the
-			// refresh token we just took.
-			await supabase.auth.signOut({ scope: "local" });
+			//
+			// Deleted straight out of storage rather than via `signOut()`. Even
+			// `scope: "local"` posts to /logout, which revokes this session at
+			// Supabase — so the tokens taken two lines above would be dead on
+			// their first use and the interceptor would bounce the user to
+			// sign-in from the dashboard.
+			try {
+				window.localStorage.removeItem(OAUTH_STORAGE_KEY);
+			} catch {
+				// Storage can be unavailable (private mode, blocked cookies). The
+				// stale entry is harmless — nothing reads it after this point.
+			}
 
 			toast.success("Welcome back!");
 			router.replace(pageRoutes.dashboardRoutes.DASHBOARD);

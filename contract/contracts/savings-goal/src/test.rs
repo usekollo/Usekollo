@@ -69,9 +69,10 @@ fn setup<'a>() -> Harness<'a> {
     let sac = env.register_stellar_asset_contract_v2(admin.clone());
     let token = sac.address();
 
-    let contract_id = env.register(Contract, ());
+    // Constructor args, supplied at deploy — there is no separate initialize
+    // call to make any more.
+    let contract_id = env.register(Contract, (admin.clone(), vec![&env, token.clone()]));
     let client = ContractClient::new(&env, &contract_id);
-    client.initialize(&admin, &vec![&env, token.clone()]);
 
     Harness {
         token_admin: token::StellarAssetClient::new(&env, &token),
@@ -91,10 +92,10 @@ fn funded_owner(h: &Harness, funded: i128) -> Address {
     owner
 }
 
-// -- initialize ----------------------------------------------------------
+// -- constructor ---------------------------------------------------------
 
 #[test]
-fn initialize_sets_admin_and_allowlist() {
+fn constructor_sets_admin_and_allowlist() {
     let h = setup();
     let allowed = h.client.get_allowed_assets();
 
@@ -102,37 +103,27 @@ fn initialize_sets_admin_and_allowlist() {
     assert!(allowed.contains(&h.token));
 }
 
-#[test]
-fn initialize_is_one_time_only() {
-    let h = setup();
+// `initialize_is_one_time_only` and `entrypoints_reject_calls_before_initialize`
+// used to live here. Both tested a callable `initialize`, which no longer
+// exists: setup is a constructor, so the contract cannot be initialised twice
+// and cannot be observed uninitialised. The states they asserted on are now
+// unrepresentable rather than merely rejected.
 
-    assert_eq!(
-        h.client
-            .try_initialize(&h.admin, &vec![&h.env, h.token.clone()])
-            .unwrap_err()
-            .unwrap(),
-        Error::AlreadyInitialized
-    );
-}
-
+/// Naming an address as admin is not enough — it has to actually sign the
+/// deploy. This is what stops a third party from deploying a copy that claims
+/// someone else as its admin.
 #[test]
-fn entrypoints_reject_calls_before_initialize() {
+#[should_panic]
+fn constructor_rejects_a_deploy_the_admin_did_not_authorise() {
     let env = Env::default();
-    env.mock_all_auths();
     env.ledger().set_timestamp(NOW);
 
-    let contract_id = env.register(Contract, ());
-    let client = ContractClient::new(&env, &contract_id);
-    let owner = Address::generate(&env);
-    let token = Address::generate(&env);
+    let admin = Address::generate(&env);
+    let asset = Address::generate(&env);
 
-    assert_eq!(
-        client
-            .try_create_goal(&owner, &String::from_str(&env, "x"), &token, &100, &FUTURE)
-            .unwrap_err()
-            .unwrap(),
-        Error::NotInitialized
-    );
+    // Deliberately no mock_all_auths: require_auth in the constructor must
+    // reject this deploy.
+    env.register(Contract, (admin.clone(), vec![&env, asset.clone()]));
 }
 
 // -- create_goal ---------------------------------------------------------

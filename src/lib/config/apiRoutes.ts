@@ -45,4 +45,10 @@ export const apiRoutes = {
 		PREPARE: "/api/v1/tx/prepare",
 		SUBMIT: "/api/v1/tx/submit",
 	},
+
+	// Where client-side crashes are posted so they show up in the server log
+	// rather than only in the user's own console. See lib/report-error.
+	telemetry: {
+		ERROR: "/api/v1/telemetry/error",
+	},
 };

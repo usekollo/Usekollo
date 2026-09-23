@@ -182,3 +182,39 @@ model EmailOtp {
   @@index([userId], map: "email_otp_user_idx")
   @@map("email_otp")
 }
+
+/// Failed password attempts, for throttling sign-in.
+///
+/// This exists because proxying sign-in through our own API defeats the rate
+/// limiting Supabase would otherwise apply: every attempt reaches it from this
+/// server's address, so a thousand guesses from one attacker look exactly like
+/// a thousand users signing in normally. The limit has to live here, where the
+/// caller's own address is still visible.
+///
+/// Rows are keyed by an opaque scope string rather than by user id — a guess
+/// against an address that has no account must be counted too, or the table
+/// itself would reveal which addresses exist.
+model LoginAttempt {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // "email:<address>" or "ip:<address>". Two scopes are tracked separately so
+  // that hammering one account and spraying one password across many accounts
+  // are both caught; neither alone catches both.
+  scope String
+
+  failures Int @default(0)
+
+  // Set once the limit is hit. Attempts are refused outright until it passes,
+  // whether or not the password offered is correct.
+  lockedUntil DateTime? @map("locked_until") @db.Timestamptz(6)
+
+  // When the current run of failures began. A run older than the window is
+  // treated as expired and restarted, so an occasional typo months apart never
+  // accumulates into a lockout.
+  firstFailureAt DateTime @default(now()) @map("first_failure_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([scope], map: "login_attempts_scope_idx")
+  @@index([updatedAt], map: "login_attempts_updated_idx")
+  @@map("login_attempts")
+}
