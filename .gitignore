@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma — generated client, rebuilt by `pnpm db:generate`
+/src/generated/
+
 # Markdown & documents — do not push
 *.md
 *.docx

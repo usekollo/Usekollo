@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { pageRoutes } from "@/lib/config/routes";
 import { useIsAuthenticated } from "@/lib/stores/userAuthStore";
 import { fadeUp, staggerContainer, zoomIn } from "@/lib/utils/animations";
-import ConnectWalletModal from "./ConnectWalletModal";
 import WalletIcon from "@/components/icons/WalletIcon";
 
 // Figma "Landing Page" hero (104-3807 desktop / 104-5087 mobile). The phone
@@ -37,14 +36,14 @@ export default function HeroSection() {
 					</motion.p>
 					<motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
 						{isAuthenticated ? (
-							<ConnectWalletModal
-								trigger={
-									<Button size="xl" className="w-full sm:w-60">
-										<WalletIcon className="size-4 text-primary-foreground" />
-										Connect Wallet
-									</Button>
-								}
-							/>
+							<Button
+								href={pageRoutes.dashboardRoutes.DASHBOARD}
+								size="xl"
+								className="w-full sm:w-60"
+							>
+								<WalletIcon className="size-4 text-primary-foreground" />
+								Go to Dashboard
+							</Button>
 						) : (
 							<>
 								<Button href={pageRoutes.authRoutes.SIGN_UP} size="xl" className="w-full sm:w-60">

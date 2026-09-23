@@ -11,6 +11,9 @@ export const pageRoutes = {
 		RESET_PASSWORD: "/auth/reset-password",
 		ACCOUNT_CREATED: "/auth/account-created",
 		VERIFY_EMAIL: "/auth/verify-email",
+		// Where Supabase sends the browser back after a Google sign-in.
+		// Must also be allowlisted in Supabase -> Authentication -> URL Configuration.
+		OAUTH_CALLBACK: "/auth/callback",
 	},
 	dashboardRoutes: {
 		DASHBOARD: "/dashboard",

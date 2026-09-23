@@ -12,7 +12,31 @@ const SESSION_EXPIRES_AT_COOKIE = "kollo_session_expires_at";
 // that window but never pushes the cap further out.
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-const cookieOptions = { secure: true, sameSite: "strict" as const };
+/**
+ * Whether to mark the auth cookies `secure`.
+ *
+ * Over HTTPS: always. Over plain HTTP the browser discards a `secure` cookie
+ * outright, so the session silently fails to persist — the user signs in, gets
+ * a session, and is bounced straight back to sign-in with nothing in the
+ * console to explain it.
+ *
+ * This used to exempt only localhost by name, which covered a developer on
+ * Safari but not a phone pointed at the dev server over the LAN
+ * (http://192.168.x.x:3000) — there the hostname is an IP, the cookies were
+ * marked secure over HTTP, and every mobile sign-in failed for that reason
+ * alone.
+ *
+ * Keyed on the environment rather than the hostname so the relaxation cannot
+ * follow the code into production: a deployed build over plain HTTP keeps
+ * `secure` and fails closed, which is the right outcome — that configuration
+ * is broken and should not quietly start sending tokens in the clear.
+ */
+const isSecureOrigin =
+	typeof window === "undefined" ||
+	window.location.protocol === "https:" ||
+	process.env.NODE_ENV === "production";
+
+const cookieOptions = { secure: isSecureOrigin, sameSite: "strict" as const };
 
 const msToDays = (ms: number) => ms / 86_400_000;
 
@@ -33,6 +57,8 @@ interface AuthState {
 	setTokens: (tokens: AuthTokensData) => void;
 	setUser: (user: UserProfile) => void;
 	logout: () => void;
+	/** Drop any existing identity before establishing a new one. */
+	resetSession: () => void;
 	initializeAuth: () => void;
 }
 
@@ -63,9 +89,15 @@ const persistTokens = (tokens: AuthTokensData, isNewLogin: boolean) => {
 	return sessionExpiresAt;
 };
 
-// Every trace of the signed-out user — cookies, in-memory auth state, and
-// the React Query cache — so nothing from one account lingers after they
-// sign out (e.g. a second person using the same device+browser next).
+// Every trace of the previous user — cookies, in-memory auth state, and the
+// React Query cache — so nothing from one account lingers into the next.
+//
+// The cache is the part that bites. `getQueryClient()` is a per-tab
+// singleton that survives client-side navigation, and queries default to a
+// 60s staleTime, so a cached ["dashboard-summary"] (which holds goals AND the
+// activity feed) is handed straight to whoever asks next and is not even
+// refetched for a minute. Clearing it is what stops one account's
+// transactions rendering in another's dashboard.
 const clearSession = () => {
 	Cookies.remove(ACCESS_TOKEN_COOKIE);
 	Cookies.remove(REFRESH_TOKEN_COOKIE);
@@ -73,6 +105,15 @@ const clearSession = () => {
 
 	getQueryClient().clear();
 };
+
+/** The signed-out auth slice, so logout and identity changes agree on it. */
+const SIGNED_OUT = {
+	user: null,
+	accessToken: null,
+	refreshToken: null,
+	sessionExpiresAt: null,
+	isAuthenticated: false,
+} as const;
 
 export const useAuthStore = create<AuthState>((set) => ({
 	user: null,
@@ -83,6 +124,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 	isInitialized: false,
 
 	login: (tokens, user) => {
+		// Unconditionally, before anything is written for the incoming user.
+		// Signing in is an identity change, and the previous identity's cached
+		// queries must not outlive it — without this, signing in as B on a
+		// browser that was signed in as A renders A's goals and activity feed
+		// to B, because the cache is keyed only by query name.
+		clearSession();
+
 		const sessionExpiresAt = persistTokens(tokens, true);
 		set({
 			accessToken: tokens.accessToken,
@@ -91,6 +139,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 			user: user ?? null,
 			isAuthenticated: true,
 		});
+	},
+
+	// Drops any signed-in identity without the caller needing to know whether
+	// there was one. Used at the head of the sign-up and sign-in flows: those
+	// are about to establish a *new* identity, so an existing session left
+	// standing is what let a registering user land in someone else's account.
+	resetSession: () => {
+		clearSession();
+		set({ ...SIGNED_OUT });
 	},
 
 	setTokens: (tokens) => {
@@ -102,13 +159,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 	logout: () => {
 		clearSession();
-		set({
-			user: null,
-			accessToken: null,
-			refreshToken: null,
-			sessionExpiresAt: null,
-			isAuthenticated: false,
-		});
+		set({ ...SIGNED_OUT });
 	},
 
 	initializeAuth: () => {
@@ -122,14 +173,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 		// check the timestamp directly rather than trusting mere presence.
 		if (sessionExpiresAt && sessionExpiresAt <= Date.now()) {
 			clearSession();
-			set({
-				user: null,
-				accessToken: null,
-				refreshToken: null,
-				sessionExpiresAt: null,
-				isAuthenticated: false,
-				isInitialized: true,
-			});
+			set({ ...SIGNED_OUT, isInitialized: true });
 			return;
 		}
 
